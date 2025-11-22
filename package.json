@@ -51,10 +51,6 @@
     "bin": "cleanup",
     "dirname": "cleanup",
     "commands": "./dist/commands",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
-    ],
     "topicSeparator": " ",
     "topics": {
       "hello": {
