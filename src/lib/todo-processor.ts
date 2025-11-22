@@ -71,11 +71,40 @@ ${context.fullContext}
 export function removeTodoFromFile(todo: TodoMatch): void {
   const content = readFileSync(todo.filePath, 'utf-8')
   const lines = content.split('\n')
-  const lineIndex = todo.lineNumber - 1 // Convert to 0-based index
+  const lineIndex = todo.lineNumber - 1
+  const originalLine = lines[lineIndex]!
+  const matchIndex = originalLine.indexOf(todo.match)
 
-  // Remove the TODO line
-  lines.splice(lineIndex, 1)
+  if (matchIndex === -1) {
+    return
+  }
 
-  // Write back to file
-  writeFileSync(todo.filePath, lines.join('\n'), 'utf-8')
+  let commentStartIndex = -1
+
+  for (let i = matchIndex; i >= 0; i--) {
+    if (originalLine.substring(i, i + 2) === '//') {
+      commentStartIndex = i
+      break
+    }
+  }
+
+  if (commentStartIndex === -1) {
+    for (let i = matchIndex; i >= 0; i--) {
+      if (originalLine[i] === '#') {
+        commentStartIndex = i
+        break
+      }
+    }
+  }
+
+  if (commentStartIndex === -1) {
+    return
+  }
+
+  const codeBeforeComment = originalLine.substring(0, commentStartIndex).trimEnd()
+
+  if (codeBeforeComment.length > 0) {
+    lines[lineIndex] = codeBeforeComment
+    writeFileSync(todo.filePath, lines.join('\n'), 'utf-8')
+  }
 }
