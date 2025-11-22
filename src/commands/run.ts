@@ -79,10 +79,7 @@ export default class Run extends Command {
       )
 
       try {
-        // Extract context
         const context = extractContext(todo, linesAbove, linesBelow)
-
-        // Format ticket description
         const description = formatTicketDescription(context)
 
         // Create title from TODO description (truncate if too long)

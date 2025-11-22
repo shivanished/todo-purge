@@ -12,7 +12,7 @@ export interface TodoContext {
 export function extractContext(todo: TodoMatch, linesAbove: number, linesBelow: number): TodoContext {
   const content = readFileSync(todo.filePath, 'utf-8')
   const lines = content.split('\n')
-  const lineIndex = todo.lineNumber - 1 // Convert to 0-based index
+  const lineIndex = todo.lineNumber - 1
 
   // Extract lines above (handle file start)
   const startIndex = Math.max(0, lineIndex - linesAbove)
