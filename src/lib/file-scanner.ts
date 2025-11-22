@@ -9,8 +9,6 @@ export interface TodoMatch {
   description: string
 }
 
-// Patterns to match TODO/FIXME comments
-// Matches: // TODO: description, # TODO: description, // TODO(issue): description, // FIXME: description
 const TODO_PATTERNS = [
   /\/\/\s*(TODO|FIXME)(\([^)]+\))?\s*:\s*(.+)/i, // // TODO: or // FIXME: or // TODO(issue):
   /#\s*(TODO|FIXME)(\([^)]+\))?\s*:\s*(.+)/i, // # TODO: or # FIXME: or # TODO(issue):
@@ -42,10 +40,8 @@ export function scanDirectory(rootDir: string): TodoMatch[] {
 
       for (const entry of entries) {
         const fullPath = join(dir, entry)
-        const relativePath = relative(rootPath, fullPath)
         const stats = statSync(fullPath)
 
-        // Skip excluded directories
         if (stats.isDirectory()) {
           if (EXCLUDED_DIRS.has(entry)) {
             continue
@@ -53,8 +49,7 @@ export function scanDirectory(rootDir: string): TodoMatch[] {
           scanDir(fullPath)
           continue
         }
-
-        // Only process text files (common source code extensions)
+``
         if (stats.isFile() && isSourceFile(entry)) {
           const fileTodos = scanFile(fullPath)
           todos.push(...fileTodos)
@@ -115,7 +110,6 @@ function isSourceFile(filename: string): boolean {
     '.less',
     '.styl',
   ]
-
   return sourceExtensions.some(ext => filename.endsWith(ext))
 }
 
@@ -133,7 +127,6 @@ function scanFile(filePath: string): TodoMatch[] {
       for (const pattern of TODO_PATTERNS) {
         const match = line.match(pattern)
         if (match) {
-          // Extract description (the part after TODO/FIXME:)
           const description = match[3] || match[0]
           todos.push({
             filePath,
@@ -142,12 +135,11 @@ function scanFile(filePath: string): TodoMatch[] {
             match: match[0],
             description: description.trim(),
           })
-          break // Only match once per line
+          break
         }
       }
     }
   } catch (error) {
-    // Skip files we can't read
     if (error instanceof Error && 'code' in error && error.code === 'EACCES') {
       return todos
     }
