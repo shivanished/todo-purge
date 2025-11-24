@@ -1,12 +1,12 @@
 {
-  "name": "cleanup",
+  "name": "todo-purge",
   "description": "A CLI tool to clean TODOs out of your code and replace them with Linear tickets.",
   "version": "0.0.0",
   "author": "Shivansh Soni",
   "bin": {
-    "cleanup": "./bin/run.js"
+    "todo-purge": "./bin/run.js"
   },
-  "bugs": "https://github.com/shivanished/cleanup/issues",
+  "bugs": "https://github.com/shivanished/todo-purge/issues",
   "dependencies": {
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
@@ -40,7 +40,7 @@
     "./dist",
     "./oclif.manifest.json"
   ],
-  "homepage": "https://github.com/shivanished/cleanup",
+  "homepage": "https://github.com/shivanished/todo-purge",
   "keywords": [
     "oclif"
   ],
@@ -48,8 +48,8 @@
   "main": "dist/index.js",
   "type": "module",
   "oclif": {
-    "bin": "cleanup",
-    "dirname": "cleanup",
+    "bin": "todo-purge",
+    "dirname": "todo-purge",
     "commands": "./dist/commands",
     "topicSeparator": " ",
     "topics": {
@@ -58,7 +58,7 @@
       }
     }
   },
-  "repository": "shivanished/cleanup",
+  "repository": "shivanished/todo-purge",
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint",
