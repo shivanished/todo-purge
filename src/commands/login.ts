@@ -51,7 +51,7 @@ export default class Login extends Command {
         this.error(
           chalk.red(
             `Failed to switch teams: ${error instanceof Error ? error.message : String(error)}. ` +
-              'Try running `cleanup login` without --switch-team to reauthenticate.',
+              'Try running `todo-purge login` without --switch-team to reauthenticate.',
           ),
         )
       }
@@ -118,7 +118,7 @@ export default class Login extends Command {
         const useExisting = await this.prompt(chalk.yellow(`Use existing team? (Y/n): `))
         if (useExisting.toLowerCase() !== 'n' && useExisting.toLowerCase() !== 'no') {
           this.log(chalk.green('Using existing team configuration.'))
-          this.log(chalk.green('\nLogin successful! You can now run `cleanup run` to process TODOs.'))
+          this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
           return
         }
       }
@@ -143,6 +143,6 @@ export default class Login extends Command {
     const selectedTeam = teams[teamIndex]
     setTeamId(selectedTeam.id)
     this.log(chalk.green(`✓ Team "${selectedTeam.name}" selected and stored.`))
-    this.log(chalk.green('\nLogin successful! You can now run `cleanup run` to process TODOs.'))
+    this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
   }
 }

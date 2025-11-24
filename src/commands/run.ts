@@ -26,26 +26,20 @@ export default class Run extends Command {
 
     // Check if logged in
     if (!hasApiKey()) {
-      this.error(
-        chalk.red('Not logged in. Please run `cleanup login` first to authenticate with Linear.'),
-      )
+      this.error(chalk.red('Not logged in. Please run `todo-purge login` first to authenticate with Linear.'))
     }
 
     const apiKey = getApiKey()!
     const teamId = getTeamId()
 
     if (!teamId) {
-      this.error(
-        chalk.red('No team selected. Please run `cleanup login` to select a team.'),
-      )
+      this.error(chalk.red('No team selected. Please run `todo-purge login` to select a team.'))
     }
 
     // Parse context lines
     const contextLinesMatch = flags['context-lines'].match(/^(\d+),(\d+)$/)
     if (!contextLinesMatch) {
-      this.error(
-        chalk.red('Invalid context-lines format. Use format: above,below (e.g., 5,10)'),
-      )
+      this.error(chalk.red('Invalid context-lines format. Use format: above,below (e.g., 5,10)'))
     }
 
     const linesAbove = parseInt(contextLinesMatch[1]!, 10)
@@ -74,26 +68,20 @@ export default class Run extends Command {
       const todo = todos[i]!
       const relativePath = relative(process.cwd(), todo.filePath)
 
-      this.log(
-        chalk.cyan(`[${i + 1}/${todos.length}] Processing: ${relativePath}:${todo.lineNumber}`),
-      )
+      this.log(chalk.cyan(`[${i + 1}/${todos.length}] Processing: ${relativePath}:${todo.lineNumber}`))
 
       try {
         const context = extractContext(todo, linesAbove, linesBelow)
         const description = formatTicketDescription(context)
 
         // Create title from TODO description (truncate if too long)
-        const title = todo.description.length > 100
-          ? `${todo.description.substring(0, 97)}...`
-          : todo.description
+        const title = todo.description.length > 100 ? `${todo.description.substring(0, 97)}...` : todo.description
 
         // Create Linear ticket
         this.log(chalk.gray('  Creating Linear ticket...'))
         const issue = await client.createIssue(teamId!, title, description)
 
-        this.log(
-          chalk.green(`  ✓ Created ticket: ${issue.identifier} - ${issue.title}`),
-        )
+        this.log(chalk.green(`  ✓ Created ticket: ${issue.identifier} - ${issue.title}`))
         this.log(chalk.gray(`  URL: ${issue.url}\n`))
 
         // Remove TODO from file
@@ -103,8 +91,8 @@ export default class Run extends Command {
         this.error(
           chalk.red(
             `\nFailed to process TODO at ${relativePath}:${todo.lineNumber}\n` +
-            `Error: ${error instanceof Error ? error.message : String(error)}\n` +
-            'Stopping processing.',
+              `Error: ${error instanceof Error ? error.message : String(error)}\n` +
+              'Stopping processing.',
           ),
         )
       }

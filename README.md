@@ -1,12 +1,12 @@
-cleanup
+todo-purge
 =================
 
 A CLI tool to clean TODOs out of your code and replace them with Linear tickets.
 
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/cleanup.svg)](https://npmjs.org/package/cleanup)
-[![Downloads/week](https://img.shields.io/npm/dw/cleanup.svg)](https://npmjs.org/package/cleanup)
+[![Version](https://img.shields.io/npm/v/todo-purge.svg)](https://npmjs.org/package/todo-purge)
+[![Downloads/week](https://img.shields.io/npm/dw/todo-purge.svg)](https://npmjs.org/package/todo-purge)
 
 
 <!-- toc -->
@@ -16,40 +16,40 @@ A CLI tool to clean TODOs out of your code and replace them with Linear tickets.
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g cleanup
-$ cleanup COMMAND
+$ npm install -g todo-purge
+$ todo-purge COMMAND
 running command...
-$ cleanup (--version)
-cleanup/0.0.0 darwin-arm64 node-v24.11.1
-$ cleanup --help [COMMAND]
+$ todo-purge (--version)
+todo-purge/0.0.0 darwin-arm64 node-v24.11.1
+$ todo-purge --help [COMMAND]
 USAGE
-  $ cleanup COMMAND
+  $ todo-purge COMMAND
 ...
 ```
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`cleanup hello PERSON`](#cleanup-hello-person)
-* [`cleanup hello world`](#cleanup-hello-world)
-* [`cleanup help [COMMAND]`](#cleanup-help-command)
-* [`cleanup plugins`](#cleanup-plugins)
-* [`cleanup plugins add PLUGIN`](#cleanup-plugins-add-plugin)
-* [`cleanup plugins:inspect PLUGIN...`](#cleanup-pluginsinspect-plugin)
-* [`cleanup plugins install PLUGIN`](#cleanup-plugins-install-plugin)
-* [`cleanup plugins link PATH`](#cleanup-plugins-link-path)
-* [`cleanup plugins remove [PLUGIN]`](#cleanup-plugins-remove-plugin)
-* [`cleanup plugins reset`](#cleanup-plugins-reset)
-* [`cleanup plugins uninstall [PLUGIN]`](#cleanup-plugins-uninstall-plugin)
-* [`cleanup plugins unlink [PLUGIN]`](#cleanup-plugins-unlink-plugin)
-* [`cleanup plugins update`](#cleanup-plugins-update)
+* [`todo-purge hello PERSON`](#todo-purge-hello-person)
+* [`todo-purge hello world`](#todo-purge-hello-world)
+* [`todo-purge help [COMMAND]`](#todo-purge-help-command)
+* [`todo-purge plugins`](#todo-purge-plugins)
+* [`todo-purge plugins add PLUGIN`](#todo-purge-plugins-add-plugin)
+* [`todo-purge plugins:inspect PLUGIN...`](#todo-purge-pluginsinspect-plugin)
+* [`todo-purge plugins install PLUGIN`](#todo-purge-plugins-install-plugin)
+* [`todo-purge plugins link PATH`](#todo-purge-plugins-link-path)
+* [`todo-purge plugins remove [PLUGIN]`](#todo-purge-plugins-remove-plugin)
+* [`todo-purge plugins reset`](#todo-purge-plugins-reset)
+* [`todo-purge plugins uninstall [PLUGIN]`](#todo-purge-plugins-uninstall-plugin)
+* [`todo-purge plugins unlink [PLUGIN]`](#todo-purge-plugins-unlink-plugin)
+* [`todo-purge plugins update`](#todo-purge-plugins-update)
 
-## `cleanup hello PERSON`
+## `todo-purge hello PERSON`
 
 Say hello
 
 ```
 USAGE
-  $ cleanup hello PERSON -f <value>
+  $ todo-purge hello PERSON -f <value>
 
 ARGUMENTS
   PERSON  Person to say hello to
@@ -61,37 +61,37 @@ DESCRIPTION
   Say hello
 
 EXAMPLES
-  $ cleanup hello friend --from oclif
+  $ todo-purge hello friend --from oclif
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [src/commands/hello/index.ts](https://github.com/shivanished/cleanup/blob/v0.0.0/src/commands/hello/index.ts)_
+_See code: [src/commands/hello/index.ts](https://github.com/shivanished/todo-purge/blob/v0.0.0/src/commands/hello/index.ts)_
 
-## `cleanup hello world`
+## `todo-purge hello world`
 
 Say hello world
 
 ```
 USAGE
-  $ cleanup hello world
+  $ todo-purge hello world
 
 DESCRIPTION
   Say hello world
 
 EXAMPLES
-  $ cleanup hello world
+  $ todo-purge hello world
   hello world! (./src/commands/hello/world.ts)
 ```
 
-_See code: [src/commands/hello/world.ts](https://github.com/shivanished/cleanup/blob/v0.0.0/src/commands/hello/world.ts)_
+_See code: [src/commands/hello/world.ts](https://github.com/shivanished/todo-purge/blob/v0.0.0/src/commands/hello/world.ts)_
 
-## `cleanup help [COMMAND]`
+## `todo-purge help [COMMAND]`
 
-Display help for cleanup.
+Display help for todo-purge.
 
 ```
 USAGE
-  $ cleanup help [COMMAND...] [-n]
+  $ todo-purge help [COMMAND...] [-n]
 
 ARGUMENTS
   [COMMAND...]  Command to show help for.
@@ -100,18 +100,18 @@ FLAGS
   -n, --nested-commands  Include all nested commands in the output.
 
 DESCRIPTION
-  Display help for cleanup.
+  Display help for todo-purge.
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.2.35/src/commands/help.ts)_
 
-## `cleanup plugins`
+## `todo-purge plugins`
 
 List installed plugins.
 
 ```
 USAGE
-  $ cleanup plugins [--json] [--core]
+  $ todo-purge plugins [--json] [--core]
 
 FLAGS
   --core  Show core plugins.
@@ -123,18 +123,18 @@ DESCRIPTION
   List installed plugins.
 
 EXAMPLES
-  $ cleanup plugins
+  $ todo-purge plugins
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.53/src/commands/plugins/index.ts)_
 
-## `cleanup plugins add PLUGIN`
+## `todo-purge plugins add PLUGIN`
 
-Installs a plugin into cleanup.
+Installs a plugin into todo-purge.
 
 ```
 USAGE
-  $ cleanup plugins add PLUGIN... [--json] [-f] [-h] [-s | -v]
+  $ todo-purge plugins add PLUGIN... [--json] [-f] [-h] [-s | -v]
 
 ARGUMENTS
   PLUGIN...  Plugin to install.
@@ -149,7 +149,7 @@ GLOBAL FLAGS
   --json  Format output as json.
 
 DESCRIPTION
-  Installs a plugin into cleanup.
+  Installs a plugin into todo-purge.
 
   Uses npm to install plugins.
 
@@ -159,29 +159,29 @@ DESCRIPTION
   Use the CLEANUP_NPM_REGISTRY environment variable to set the npm registry.
 
 ALIASES
-  $ cleanup plugins add
+  $ todo-purge plugins add
 
 EXAMPLES
   Install a plugin from npm registry.
 
-    $ cleanup plugins add myplugin
+    $ todo-purge plugins add myplugin
 
   Install a plugin from a github url.
 
-    $ cleanup plugins add https://github.com/someuser/someplugin
+    $ todo-purge plugins add https://github.com/someuser/someplugin
 
   Install a plugin from a github slug.
 
-    $ cleanup plugins add someuser/someplugin
+    $ todo-purge plugins add someuser/someplugin
 ```
 
-## `cleanup plugins:inspect PLUGIN...`
+## `todo-purge plugins:inspect PLUGIN...`
 
 Displays installation properties of a plugin.
 
 ```
 USAGE
-  $ cleanup plugins inspect PLUGIN...
+  $ todo-purge plugins inspect PLUGIN...
 
 ARGUMENTS
   PLUGIN...  [default: .] Plugin to inspect.
@@ -197,18 +197,18 @@ DESCRIPTION
   Displays installation properties of a plugin.
 
 EXAMPLES
-  $ cleanup plugins inspect myplugin
+  $ todo-purge plugins inspect myplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.53/src/commands/plugins/inspect.ts)_
 
-## `cleanup plugins install PLUGIN`
+## `todo-purge plugins install PLUGIN`
 
-Installs a plugin into cleanup.
+Installs a plugin into todo-purge.
 
 ```
 USAGE
-  $ cleanup plugins install PLUGIN... [--json] [-f] [-h] [-s | -v]
+  $ todo-purge plugins install PLUGIN... [--json] [-f] [-h] [-s | -v]
 
 ARGUMENTS
   PLUGIN...  Plugin to install.
@@ -223,7 +223,7 @@ GLOBAL FLAGS
   --json  Format output as json.
 
 DESCRIPTION
-  Installs a plugin into cleanup.
+  Installs a plugin into todo-purge.
 
   Uses npm to install plugins.
 
@@ -233,31 +233,31 @@ DESCRIPTION
   Use the CLEANUP_NPM_REGISTRY environment variable to set the npm registry.
 
 ALIASES
-  $ cleanup plugins add
+  $ todo-purge plugins add
 
 EXAMPLES
   Install a plugin from npm registry.
 
-    $ cleanup plugins install myplugin
+    $ todo-purge plugins install myplugin
 
   Install a plugin from a github url.
 
-    $ cleanup plugins install https://github.com/someuser/someplugin
+    $ todo-purge plugins install https://github.com/someuser/someplugin
 
   Install a plugin from a github slug.
 
-    $ cleanup plugins install someuser/someplugin
+    $ todo-purge plugins install someuser/someplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.53/src/commands/plugins/install.ts)_
 
-## `cleanup plugins link PATH`
+## `todo-purge plugins link PATH`
 
 Links a plugin into the CLI for development.
 
 ```
 USAGE
-  $ cleanup plugins link PATH [-h] [--install] [-v]
+  $ todo-purge plugins link PATH [-h] [--install] [-v]
 
 ARGUMENTS
   PATH  [default: .] path to plugin
@@ -277,18 +277,18 @@ DESCRIPTION
 
 
 EXAMPLES
-  $ cleanup plugins link myplugin
+  $ todo-purge plugins link myplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.53/src/commands/plugins/link.ts)_
 
-## `cleanup plugins remove [PLUGIN]`
+## `todo-purge plugins remove [PLUGIN]`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ cleanup plugins remove [PLUGIN...] [-h] [-v]
+  $ todo-purge plugins remove [PLUGIN...] [-h] [-v]
 
 ARGUMENTS
   [PLUGIN...]  plugin to uninstall
@@ -301,20 +301,20 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ cleanup plugins unlink
-  $ cleanup plugins remove
+  $ todo-purge plugins unlink
+  $ todo-purge plugins remove
 
 EXAMPLES
-  $ cleanup plugins remove myplugin
+  $ todo-purge plugins remove myplugin
 ```
 
-## `cleanup plugins reset`
+## `todo-purge plugins reset`
 
 Remove all user-installed and linked plugins.
 
 ```
 USAGE
-  $ cleanup plugins reset [--hard] [--reinstall]
+  $ todo-purge plugins reset [--hard] [--reinstall]
 
 FLAGS
   --hard       Delete node_modules and package manager related files in addition to uninstalling plugins.
@@ -323,13 +323,13 @@ FLAGS
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.53/src/commands/plugins/reset.ts)_
 
-## `cleanup plugins uninstall [PLUGIN]`
+## `todo-purge plugins uninstall [PLUGIN]`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ cleanup plugins uninstall [PLUGIN...] [-h] [-v]
+  $ todo-purge plugins uninstall [PLUGIN...] [-h] [-v]
 
 ARGUMENTS
   [PLUGIN...]  plugin to uninstall
@@ -342,22 +342,22 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ cleanup plugins unlink
-  $ cleanup plugins remove
+  $ todo-purge plugins unlink
+  $ todo-purge plugins remove
 
 EXAMPLES
-  $ cleanup plugins uninstall myplugin
+  $ todo-purge plugins uninstall myplugin
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.4.53/src/commands/plugins/uninstall.ts)_
 
-## `cleanup plugins unlink [PLUGIN]`
+## `todo-purge plugins unlink [PLUGIN]`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ cleanup plugins unlink [PLUGIN...] [-h] [-v]
+  $ todo-purge plugins unlink [PLUGIN...] [-h] [-v]
 
 ARGUMENTS
   [PLUGIN...]  plugin to uninstall
@@ -370,20 +370,20 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ cleanup plugins unlink
-  $ cleanup plugins remove
+  $ todo-purge plugins unlink
+  $ todo-purge plugins remove
 
 EXAMPLES
-  $ cleanup plugins unlink myplugin
+  $ todo-purge plugins unlink myplugin
 ```
 
-## `cleanup plugins update`
+## `todo-purge plugins update`
 
 Update installed plugins.
 
 ```
 USAGE
-  $ cleanup plugins update [-h] [-v]
+  $ todo-purge plugins update [-h] [-v]
 
 FLAGS
   -h, --help     Show CLI help.

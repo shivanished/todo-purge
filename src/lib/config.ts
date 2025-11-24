@@ -7,7 +7,7 @@ export interface Config {
   teamId?: string
 }
 
-const CONFIG_DIR = join(homedir(), '.cleanup')
+const CONFIG_DIR = join(homedir(), '.todo-purge')
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json')
 
 export function getConfigPath(): string {
