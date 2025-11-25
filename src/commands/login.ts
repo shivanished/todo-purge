@@ -1,6 +1,6 @@
 import {Command, Flags} from '@oclif/core'
 import {createInterface} from 'node:readline'
-import {setApiKey, setTeamId, hasApiKey, getTeamId, getApiKey} from '../lib/config.js'
+import {setLinearApiKey, setTeamId, hasLinearApiKey, getTeamId, getLinearApiKey} from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
 import chalk from 'chalk'
 
@@ -36,10 +36,10 @@ export default class Login extends Command {
   public async run(): Promise<void> {
     const {flags} = await this.parse(Login)
     const switchingTeam = Boolean(flags['switch-team'])
-    const alreadyLoggedIn = hasApiKey()
+    const alreadyLoggedIn = hasLinearApiKey()
 
     if (switchingTeam && alreadyLoggedIn) {
-      const storedApiKey = getApiKey()
+      const storedApiKey = getLinearApiKey()
       if (!storedApiKey) {
         this.error(chalk.red('Stored API key is missing or invalid. Please log in again.'))
       }
@@ -97,7 +97,7 @@ export default class Login extends Command {
       }
 
       // Store API key
-      setApiKey(apiKey.trim())
+      setLinearApiKey(apiKey.trim())
       this.log(chalk.green('✓ API key validated and stored.'))
 
       await this.selectTeam(client)

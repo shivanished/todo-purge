@@ -3,7 +3,8 @@ import {join} from 'node:path'
 import {homedir} from 'node:os'
 
 export interface Config {
-  apiKey?: string
+  linearApiKey?: string
+  openAIApiKey?: string
   teamId?: string
 }
 
@@ -34,15 +35,36 @@ export function writeConfig(config: Config): void {
   }
 }
 
-export function getApiKey(): string | undefined {
+export function getLinearApiKey(): string | undefined {
   const config = readConfig()
-  return config.apiKey
+  return config.linearApiKey
 }
 
-export function setApiKey(apiKey: string): void {
+export function setLinearApiKey(apiKey: string): void {
   const config = readConfig()
-  config.apiKey = apiKey
+  config.linearApiKey = apiKey
   writeConfig(config)
+}
+
+export function hasLinearApiKey(): boolean {
+  const linearApiKey = getLinearApiKey()
+  return Boolean(linearApiKey && linearApiKey.trim().length > 0)
+}
+
+export function getOpenAIApiKey(): string | undefined {
+  const config = readConfig()
+  return config.openAIApiKey
+}
+
+export function setOpenAIApiKey(openAIApiKey: string): void {
+  const config = readConfig()
+  config.openAIApiKey = openAIApiKey
+  writeConfig(config)
+}
+
+export function hasOpenAIApiKey(): boolean {
+  const openAIApiKey = getOpenAIApiKey()
+  return Boolean(openAIApiKey && openAIApiKey.trim().length > 0)
 }
 
 export function getTeamId(): string | undefined {
@@ -54,10 +76,5 @@ export function setTeamId(teamId: string): void {
   const config = readConfig()
   config.teamId = teamId
   writeConfig(config)
-}
-
-export function hasApiKey(): boolean {
-  const apiKey = getApiKey()
-  return Boolean(apiKey && apiKey.trim().length > 0)
 }
 

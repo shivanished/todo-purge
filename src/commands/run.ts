@@ -1,5 +1,5 @@
 import {Command, Flags} from '@oclif/core'
-import {getApiKey, getTeamId, hasApiKey} from '../lib/config.js'
+import {getLinearApiKey, getTeamId, hasLinearApiKey} from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
 import {scanDirectory} from '../lib/file-scanner.js'
 import {extractContext, formatTicketDescription, removeTodoFromFile} from '../lib/todo-processor.js'
@@ -30,11 +30,11 @@ export default class Run extends Command {
     const {flags} = await this.parse(Run)
 
     // Check if logged in
-    if (!hasApiKey()) {
+    if (!hasLinearApiKey()) {
       this.error(chalk.red('Not logged in. Please run `todo-purge login` first to authenticate with Linear.'))
     }
 
-    const apiKey = getApiKey()!
+    const apiKey = getLinearApiKey()!
     const teamId = getTeamId()
 
     if (!teamId) {
