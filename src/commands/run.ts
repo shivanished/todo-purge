@@ -1,6 +1,7 @@
 import {Command, Flags} from '@oclif/core'
-import {getLinearApiKey, getTeamId, hasLinearApiKey} from '../lib/config.js'
+import {getLinearApiKey, getTeamId, hasLinearApiKey, hasOpenAIApiKey, getOpenAIApiKey} from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
+import {OpenAIClient} from '../lib/openai.js'
 import {scanDirectory} from '../lib/file-scanner.js'
 import {extractContext, formatTicketDescription, removeTodoFromFile} from '../lib/todo-processor.js'
 import {relative} from 'node:path'
@@ -22,6 +23,10 @@ export default class Run extends Command {
     }),
     'keep-comments': Flags.boolean({
       description: 'Keep TODO comments in files instead of removing them',
+      default: false,
+    }),
+    'no-ai': Flags.boolean({
+      description: 'Disable AI-generated descriptions even if OpenAI key is configured',
       default: false,
     }),
   }
@@ -57,6 +62,17 @@ export default class Run extends Command {
     // Initialize Linear client
     const client = new LinearClient(apiKey)
 
+    // Check if we should use AI generation
+    const useAI = hasOpenAIApiKey() && !flags['no-ai']
+    let openAIClient: OpenAIClient | null = null
+
+    if (useAI) {
+      const openAIKey = getOpenAIApiKey()
+      if (openAIKey) {
+        openAIClient = new OpenAIClient(openAIKey)
+      }
+    }
+
     // Scan for TODOs
     this.log(chalk.blue('Scanning codebase for TODO comments...'))
     const todos = scanDirectory(process.cwd())
@@ -68,6 +84,13 @@ export default class Run extends Command {
 
     this.log(chalk.blue(`Found ${todos.length} TODO comment(s).\n`))
 
+    // Show warning if using AI for many TODOs
+    if (useAI && todos.length > 10) {
+      this.log(
+        chalk.yellow(`Generating AI descriptions for ${todos.length} TODOs. This will use your OpenAI API quota.\n`),
+      )
+    }
+
     // Process each TODO
     for (let i = 0; i < todos.length; i++) {
       const todo = todos[i]!
@@ -77,7 +100,26 @@ export default class Run extends Command {
 
       try {
         const context = extractContext(todo, linesAbove, linesBelow)
-        const description = formatTicketDescription(context)
+
+        // Try to generate AI description if enabled
+        let aiDescription: string | undefined
+        if (useAI && openAIClient) {
+          try {
+            this.log(chalk.gray('  Generating AI description...'))
+            aiDescription = await openAIClient.generateDescription(
+              todo.description,
+              relative(process.cwd(), todo.filePath),
+              todo.lineNumber,
+              context.fullContext,
+            )
+          } catch (error) {
+            // Log error but continue with manual description
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            this.log(chalk.yellow(`  OpenAI API error: ${errorMessage}. Continuing with manual description.`))
+          }
+        }
+
+        const description = formatTicketDescription(context, aiDescription)
 
         // Create title from TODO description (truncate if too long)
         const title = todo.description.length > 100 ? `${todo.description.substring(0, 97)}...` : todo.description

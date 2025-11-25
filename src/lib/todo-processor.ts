@@ -51,13 +51,11 @@ export function extractContext(todo: TodoMatch, linesAbove: number, linesBelow: 
   }
 }
 
-export function formatTicketDescription(context: TodoContext): string {
+export function formatTicketDescription(context: TodoContext, aiDescription?: string): string {
   const relativePath = relative(process.cwd(), context.todo.filePath)
-  const description = context.todo.description
+  const description = aiDescription ?? context.todo.description
 
-  return `**TODO Comment Found**
-
-${description}
+  return `${description}
 
 **Location:** \`${relativePath}:${context.todo.lineNumber}\`
 

@@ -1,7 +1,18 @@
 import {Command, Flags} from '@oclif/core'
 import {createInterface} from 'node:readline'
-import {setLinearApiKey, setTeamId, hasLinearApiKey, getTeamId, getLinearApiKey} from '../lib/config.js'
+import {
+  setLinearApiKey,
+  setTeamId,
+  hasLinearApiKey,
+  getTeamId,
+  getLinearApiKey,
+  setOpenAIApiKey,
+  hasOpenAIApiKey,
+  hasSeenOpenAIWarning,
+  setOpenAIWarningSeen,
+} from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
+import {OpenAIClient} from '../lib/openai.js'
 import chalk from 'chalk'
 
 export default class Login extends Command {
@@ -16,6 +27,9 @@ export default class Login extends Command {
     'switch-team': Flags.boolean({
       description: 'Switch teams using your existing login',
       default: false,
+    }),
+    'openai-key': Flags.string({
+      description: 'OpenAI API key for enhanced ticket descriptions',
     }),
   }
 
@@ -50,6 +64,7 @@ export default class Login extends Command {
       try {
         await this.selectTeam(client, true)
         this.log(chalk.green('✓ Team selection updated.'))
+        await this.handleOpenAIKey(flags['openai-key'])
       } catch (error) {
         this.error(
           chalk.red(
@@ -101,6 +116,7 @@ export default class Login extends Command {
       this.log(chalk.green('✓ API key validated and stored.'))
 
       await this.selectTeam(client)
+      await this.handleOpenAIKey(flags['openai-key'])
     } catch (error) {
       this.error(chalk.red(`Failed to validate API key: ${error instanceof Error ? error.message : String(error)}`))
     }
@@ -147,5 +163,84 @@ export default class Login extends Command {
     setTeamId(selectedTeam.id)
     this.log(chalk.green(`✓ Team "${selectedTeam.name}" selected and stored.`))
     this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
+  }
+
+  private async handleOpenAIKey(providedKey?: string): Promise<void> {
+    // If key was provided via flag, use it
+    if (providedKey) {
+      if (!providedKey.trim()) {
+        this.error(chalk.red('OpenAI API key cannot be empty.'))
+      }
+
+      this.log(chalk.blue('Validating OpenAI API key...'))
+      const openAIClient = new OpenAIClient(providedKey.trim())
+
+      try {
+        const isValid = await openAIClient.validateApiKey()
+        if (!isValid) {
+          this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
+        }
+
+        setOpenAIApiKey(providedKey.trim())
+        this.log(chalk.green('✓ OpenAI API key validated and stored.'))
+
+        // Show first-time warning if not seen before
+        if (!hasSeenOpenAIWarning()) {
+          this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with --no-ai flag.'))
+          setOpenAIWarningSeen()
+        }
+      } catch (error) {
+        this.error(
+          chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
+        )
+      }
+
+      return
+    }
+
+    // If key already exists, don't prompt
+    if (hasOpenAIApiKey()) {
+      return
+    }
+
+    // Otherwise, optionally prompt for it
+    const addOpenAI = await this.prompt(
+      chalk.yellow('\nWould you like to add an OpenAI API key for enhanced descriptions? (y/N): '),
+    )
+
+    if (addOpenAI.toLowerCase() !== 'y' && addOpenAI.toLowerCase() !== 'yes') {
+      return
+    }
+
+    this.log(chalk.blue('Please enter your OpenAI API key.'))
+    this.log(chalk.gray('You can create one at: https://platform.openai.com/api-keys'))
+    const openAIKey = await this.prompt(chalk.cyan('OpenAI API Key: '))
+
+    if (!openAIKey || !openAIKey.trim()) {
+      this.error(chalk.red('OpenAI API key cannot be empty.'))
+    }
+
+    this.log(chalk.blue('Validating OpenAI API key...'))
+    const openAIClient = new OpenAIClient(openAIKey.trim())
+
+    try {
+      const isValid = await openAIClient.validateApiKey()
+      if (!isValid) {
+        this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
+      }
+
+      setOpenAIApiKey(openAIKey.trim())
+      this.log(chalk.green('✓ OpenAI API key validated and stored.'))
+
+      // Show first-time warning if not seen before
+      if (!hasSeenOpenAIWarning()) {
+        this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with --no-ai flag.'))
+        setOpenAIWarningSeen()
+      }
+    } catch (error) {
+      this.error(
+        chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
+      )
+    }
   }
 }

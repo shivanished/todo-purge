@@ -6,6 +6,7 @@ export interface Config {
   linearApiKey?: string
   openAIApiKey?: string
   teamId?: string
+  hasSeenOpenAIWarning?: boolean
 }
 
 const CONFIG_DIR = join(homedir(), '.todo-purge')
@@ -78,3 +79,13 @@ export function setTeamId(teamId: string): void {
   writeConfig(config)
 }
 
+export function hasSeenOpenAIWarning(): boolean {
+  const config = readConfig()
+  return Boolean(config.hasSeenOpenAIWarning)
+}
+
+export function setOpenAIWarningSeen(): void {
+  const config = readConfig()
+  config.hasSeenOpenAIWarning = true
+  writeConfig(config)
+}
