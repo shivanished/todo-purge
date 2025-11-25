@@ -52,6 +52,12 @@ export default class Login extends Command {
     const switchingTeam = Boolean(flags['switch-team'])
     const alreadyLoggedIn = hasLinearApiKey()
 
+    // If only --openai-key is provided and user is already logged in, just handle OpenAI key
+    if (flags['openai-key'] && alreadyLoggedIn && !switchingTeam) {
+      await this.handleOpenAIKey(flags['openai-key'])
+      return
+    }
+
     if (switchingTeam && alreadyLoggedIn) {
       const storedApiKey = getLinearApiKey()
       if (!storedApiKey) {

@@ -39,15 +39,10 @@ export class LinearClient {
         }
       }
     `
-
-    console.log('[LinearClient] getTeams() - Starting request...')
     try {
-      console.log('[LinearClient] getTeams() - In try block, making request...')
       const data = await this.client.request<{teams: {nodes: LinearTeam[]}}>(query)
-      console.log('[LinearClient] getTeams() - Request successful, returning', data.teams.nodes.length, 'teams')
       return data.teams.nodes
     } catch (error) {
-      console.error('[LinearClient] getTeams() - In catch block, error occurred:', error)
       throw new Error(`Failed to fetch teams: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
