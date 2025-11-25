@@ -5,7 +5,8 @@ import {homedir} from 'node:os'
 export interface Config {
   linearApiKey?: string
   openAIApiKey?: string
-  teamId?: string
+  teamIds?: string[]       // Array of team IDs
+  activeTeamId?: number    // Index (1-based) of the active team in teamIds
   hasSeenOpenAIWarning?: boolean
 }
 
