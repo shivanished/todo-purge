@@ -10,6 +10,12 @@ import {
   hasOpenAIApiKey,
   hasSeenOpenAIWarning,
   setOpenAIWarningSeen,
+  getAllWorkspaces,
+  addWorkspace,
+  setActiveWorkspace,
+  getActiveWorkspace,
+  readConfig,
+  type Workspace,
 } from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
 import {OpenAIClient} from '../lib/openai.js'
@@ -51,55 +57,83 @@ export default class Login extends Command {
   public async run(): Promise<void> {
     const {flags} = await this.parse(Login)
     const switchingTeam = Boolean(flags['switch-team'])
-    const alreadyLoggedIn = hasLinearApiKey()
 
-    if (flags['openai-key'] && alreadyLoggedIn && !switchingTeam) {
+    if (flags['openai-key'] && hasLinearApiKey() && !switchingTeam) {
       await this.handleOpenAIKey(flags['openai-key'])
       return
     }
 
-    if (switchingTeam && alreadyLoggedIn) {
-      const storedApiKey = getLinearApiKey()
-      if (!storedApiKey) {
-        this.error(chalk.red('Stored API key is missing or invalid. Please log in again.'))
-      }
-
-      this.log(chalk.blue('Switching team using existing credentials...'))
-      const client = new LinearClient(storedApiKey!.trim())
-
-      try {
-        await this.selectTeam(client, true)
-        this.log(chalk.green('✓ Team selection updated.'))
-        await this.handleOpenAIKey(flags['openai-key'])
-      } catch (error) {
-        this.error(
-          chalk.red(
-            `Failed to switch teams: ${error instanceof Error ? error.message : String(error)}. ` +
-              'Try running `todo-purge login` without --switch-team to reauthenticate.',
-          ),
-        )
-      }
-
+    if (switchingTeam) {
+      await this.handleSwitchTeam()
+      await this.handleOpenAIKey(flags['openai-key'])
       return
     }
 
-    if (switchingTeam && !alreadyLoggedIn) {
-      this.log(chalk.yellow('No existing login found. Proceeding with full login flow (run todo-purge login).'))
+    // Regular login flow - add a new workspace
+    await this.handleNewWorkspace()
+    await this.handleOpenAIKey(flags['openai-key'])
+  }
+
+  private async handleSwitchTeam(): Promise<void> {
+    const workspaces = getAllWorkspaces()
+
+    if (workspaces.length === 0) {
+      this.log(chalk.yellow('No saved workspaces found. Adding a new workspace...'))
+      await this.addNewWorkspace()
+      return
     }
 
-    // Check if already logged in
-    if (alreadyLoggedIn) {
-      const overwrite = await this.prompt(
-        chalk.yellow('You are already logged in. Overwrite existing credentials? (y/N): '),
+    // Get active workspace index
+    const config = readConfig()
+    const activeIndex = config.activeWorkspaceIndex ?? 0
+
+    // Show existing workspaces
+    this.log(chalk.blue('\nSaved workspaces:'))
+    workspaces.forEach((workspace, index) => {
+      const activeMarker = index === activeIndex ? chalk.green(' (active)') : ''
+      this.log(chalk.cyan(`  ${index + 1}. ${workspace.teamName} (${workspace.teamKey})${activeMarker}`))
+    })
+    this.log(chalk.cyan(`  ${workspaces.length + 1}. Add new workspace`))
+
+    const choice = await this.prompt(chalk.cyan(`\nSelect workspace (1-${workspaces.length + 1}): `))
+    const choiceIndex = parseInt(choice, 10) - 1
+
+    if (isNaN(choiceIndex) || choiceIndex < 0) {
+      this.error(chalk.red('Invalid selection.'))
+    }
+
+    if (choiceIndex === workspaces.length) {
+      // Add new workspace
+      await this.addNewWorkspace()
+    } else if (choiceIndex >= 0 && choiceIndex < workspaces.length) {
+      // Switch to existing workspace
+      setActiveWorkspace(choiceIndex)
+      const workspace = workspaces[choiceIndex]!
+      this.log(chalk.green(`✓ Switched to workspace: ${workspace.teamName} (${workspace.teamKey})`))
+    } else {
+      this.error(chalk.red('Invalid selection.'))
+    }
+  }
+
+  private async handleNewWorkspace(): Promise<void> {
+    const workspaces = getAllWorkspaces()
+
+    if (workspaces.length > 0) {
+      const addAnother = await this.prompt(
+        chalk.yellow(`You have ${workspaces.length} workspace(s) saved. Add another? (y/N): `),
       )
-      if (overwrite.toLowerCase() !== 'y' && overwrite.toLowerCase() !== 'yes') {
+      if (addAnother.toLowerCase() !== 'y' && addAnother.toLowerCase() !== 'yes') {
         this.log(chalk.green('Login cancelled.'))
         return
       }
     }
 
+    await this.addNewWorkspace()
+  }
+
+  private async addNewWorkspace(): Promise<void> {
     // Prompt for API key
-    this.log(chalk.blue('Please enter your Linear API key.'))
+    this.log(chalk.blue('\nPlease enter your Linear API key.'))
     this.log(chalk.gray('You can create one at: https://linear.app/settings/api'))
     const apiKey = await this.prompt(chalk.cyan('API Key: '))
 
@@ -117,38 +151,39 @@ export default class Login extends Command {
         this.error(chalk.red('Invalid API key. Please check your API key and try again.'))
       }
 
-      // Store API key
-      setLinearApiKey(apiKey.trim())
-      this.log(chalk.green('✓ API key validated and stored.'))
+      this.log(chalk.green('✓ API key validated.'))
 
-      await this.selectTeam(client)
-      await this.handleOpenAIKey(flags['openai-key'])
+      // Select team
+      const selectedTeam = await this.selectTeam(client)
+      if (!selectedTeam) {
+        this.error(chalk.red('No team selected. Cannot create workspace.'))
+      }
+
+      // Create workspace
+      const workspace: Workspace = {
+        apiKey: apiKey.trim(),
+        teamId: selectedTeam.id,
+        teamName: selectedTeam.name,
+        teamKey: selectedTeam.key,
+      }
+
+      addWorkspace(workspace)
+      const workspaces = getAllWorkspaces()
+      setActiveWorkspace(workspaces.length - 1)
+
+      this.log(chalk.green(`✓ Workspace "${workspace.teamName} (${workspace.teamKey})" added and set as active.`))
+      this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
     } catch (error) {
       this.error(chalk.red(`Failed to validate API key: ${error instanceof Error ? error.message : String(error)}`))
     }
   }
 
-  private async selectTeam(client: LinearClient, forceReselect = false): Promise<void> {
+  private async selectTeam(client: LinearClient): Promise<{id: string; name: string; key: string} | null> {
     // Get teams and prompt for team selection
     const teams = await client.getTeams()
     if (teams.length === 0) {
       this.warn(chalk.yellow('No teams found. You may need to select a team later.'))
-      return
-    }
-
-    if (!forceReselect) {
-      // Check if team ID is already set
-      const existingTeamId = getTeamId()
-      if (existingTeamId) {
-        const useExisting = await this.prompt(chalk.yellow(`Use existing team? (Y/n): `))
-        if (useExisting.toLowerCase() !== 'n' && useExisting.toLowerCase() !== 'no') {
-          this.log(chalk.green('Using existing team configuration.'))
-          this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
-          return
-        }
-      }
-    } else {
-      this.log(chalk.blue('Please select the team you want to switch to.'))
+      return null
     }
 
     // Prompt for team selection
@@ -161,14 +196,11 @@ export default class Login extends Command {
     const teamIndex = parseInt(teamChoice, 10) - 1
 
     if (isNaN(teamIndex) || teamIndex < 0 || teamIndex >= teams.length) {
-      this.warn(chalk.yellow('Invalid team selection. You can set it later by running login again.'))
-      return
+      this.warn(chalk.yellow('Invalid team selection.'))
+      return null
     }
 
-    const selectedTeam = teams[teamIndex]
-    setTeamId(selectedTeam.id)
-    this.log(chalk.green(`✓ Team "${selectedTeam.name}" selected and stored.`))
-    this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
+    return teams[teamIndex]!
   }
 
   private async handleOpenAIKey(providedKey?: string): Promise<void> {

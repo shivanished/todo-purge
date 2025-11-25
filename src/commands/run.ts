@@ -1,5 +1,12 @@
 import {Command, Flags} from '@oclif/core'
-import {getLinearApiKey, getTeamId, hasLinearApiKey, hasOpenAIApiKey, getOpenAIApiKey} from '../lib/config.js'
+import {
+  getLinearApiKey,
+  getTeamId,
+  hasLinearApiKey,
+  hasOpenAIApiKey,
+  getOpenAIApiKey,
+  getActiveWorkspace,
+} from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
 import {OpenAIClient} from '../lib/openai.js'
 import {scanDirectory} from '../lib/file-scanner.js'
@@ -33,17 +40,52 @@ export default class Run extends Command {
   public async run(): Promise<void> {
     const {flags} = await this.parse(Run)
 
-    // Check if logged in
-    if (!hasLinearApiKey()) {
-      this.error(chalk.red('Not logged in. Please run `todo-purge login` first to authenticate with Linear.'))
+    // Check if active workspace exists
+    const activeWorkspace = getActiveWorkspace()
+    if (!activeWorkspace) {
+      this.error(
+        chalk.red(
+          'No active workspace found. Please run `todo-purge login` to add a workspace, or `todo-purge login --switch-team` to switch to an existing one.',
+        ),
+      )
     }
 
-    const apiKey = getLinearApiKey()!
-    const teamId = getTeamId()
+    // Validate active workspace's API key and team access
+    this.log(chalk.blue('Validating active workspace...'))
+    const client = new LinearClient(activeWorkspace.apiKey)
 
-    if (!teamId) {
-      this.error(chalk.red('No team selected. Please run `todo-purge login` to select a team.'))
+    try {
+      const isApiKeyValid = await client.validateApiKey()
+      if (!isApiKeyValid) {
+        this.error(
+          chalk.red(
+            `API key for workspace "${activeWorkspace.teamName} (${activeWorkspace.teamKey})" is invalid. ` +
+              'Please run `todo-purge login --switch-team` to update your credentials.',
+          ),
+        )
+      }
+
+      const hasTeamAccess = await client.validateTeamAccess(activeWorkspace.teamId)
+      if (!hasTeamAccess) {
+        this.error(
+          chalk.red(
+            `Team "${activeWorkspace.teamName} (${activeWorkspace.teamKey})" is not accessible with the current API key. ` +
+              'Please run `todo-purge login --switch-team` to update your workspace configuration.',
+          ),
+        )
+      }
+
+      this.log(chalk.green(`✓ Active workspace validated: ${activeWorkspace.teamName} (${activeWorkspace.teamKey})`))
+    } catch (error) {
+      this.error(
+        chalk.red(
+          `Failed to validate workspace: ${error instanceof Error ? error.message : String(error)}. ` +
+            'Please run `todo-purge login --switch-team` to update your credentials.',
+        ),
+      )
     }
+
+    const teamId = activeWorkspace.teamId
 
     // Parse context lines
     const contextLinesMatch = flags['context-lines'].match(/^(\d+),(\d+)$/)
@@ -58,8 +100,7 @@ export default class Run extends Command {
       this.error(chalk.red('Context lines must be non-negative numbers.'))
     }
 
-    // Initialize Linear client
-    const client = new LinearClient(apiKey)
+    // Client is already initialized above for validation
 
     // Check if we should use AI generation
     const useAI = hasOpenAIApiKey() && !flags['no-ai']
@@ -86,7 +127,9 @@ export default class Run extends Command {
     // Show warning if using AI for many TODOs
     if (useAI && todos.length > 10) {
       this.log(
-        chalk.yellow(`Generating AI descriptions for ${todos.length} TODO/FIXME comments. This will use your OpenAI API quota.\n`),
+        chalk.yellow(
+          `Generating AI descriptions for ${todos.length} TODO/FIXME comments. This will use your OpenAI API quota.\n`,
+        ),
       )
     }
 

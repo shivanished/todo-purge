@@ -92,4 +92,13 @@ export class LinearClient {
       return false
     }
   }
+
+  async validateTeamAccess(teamId: string): Promise<boolean> {
+    try {
+      const teams = await this.getTeams()
+      return teams.some((team) => team.id === teamId)
+    } catch {
+      return false
+    }
+  }
 }

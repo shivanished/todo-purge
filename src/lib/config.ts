@@ -2,12 +2,23 @@ import {readFileSync, writeFileSync, mkdirSync} from 'node:fs'
 import {join} from 'node:path'
 import {homedir} from 'node:os'
 
+export interface Workspace {
+  apiKey: string
+  teamId: string
+  teamName: string
+  teamKey: string
+}
+
 export interface Config {
-  linearApiKey?: string
+  workspaces?: Workspace[]
+  activeWorkspaceIndex?: number // 0-based index
   openAIApiKey?: string
-  teamIds?: string[]       // Array of team IDs
-  activeTeamId?: number    // Index (1-based) of the active team in teamIds
   hasSeenOpenAIWarning?: boolean
+  // Legacy fields (for migration)
+  linearApiKey?: string
+  teamId?: string
+  teamIds?: string[]
+  activeTeamId?: number
 }
 
 const CONFIG_DIR = join(homedir(), '.todo-purge')
@@ -20,10 +31,44 @@ export function getConfigPath(): string {
 export function readConfig(): Config {
   try {
     const content = readFileSync(CONFIG_FILE, 'utf-8')
-    return JSON.parse(content) as Config
+    const config = JSON.parse(content) as Config
+    // Migrate old config format to new format if needed
+    migrateConfigIfNeeded(config)
+    return config
   } catch (error) {
     // Config file doesn't exist or is invalid
     return {}
+  }
+}
+
+function migrateConfigIfNeeded(config: Config): void {
+  // If already migrated (has workspaces), skip migration
+  if (config.workspaces && config.workspaces.length > 0) {
+    return
+  }
+
+  // If old format exists, migrate it
+  if (config.linearApiKey && config.teamId) {
+    // We need team name and key, but they might not be in old config
+    // We'll use placeholder values and let the user re-login if needed
+    const workspace: Workspace = {
+      apiKey: config.linearApiKey,
+      teamId: config.teamId,
+      teamName: 'Unknown Team', // Will be updated on next login
+      teamKey: 'UNK', // Will be updated on next login
+    }
+
+    config.workspaces = [workspace]
+    config.activeWorkspaceIndex = 0
+
+    // Clean up old fields
+    delete config.linearApiKey
+    delete config.teamId
+    delete config.teamIds
+    delete config.activeTeamId
+
+    // Write migrated config
+    writeConfig(config)
   }
 }
 
@@ -37,20 +82,88 @@ export function writeConfig(config: Config): void {
   }
 }
 
-export function getLinearApiKey(): string | undefined {
+export function getActiveWorkspace(): Workspace | undefined {
   const config = readConfig()
-  return config.linearApiKey
+  if (!config.workspaces || config.workspaces.length === 0) {
+    return undefined
+  }
+  const activeIndex = config.activeWorkspaceIndex ?? 0
+  if (activeIndex < 0 || activeIndex >= config.workspaces.length) {
+    return undefined
+  }
+  return config.workspaces[activeIndex]
 }
 
-export function setLinearApiKey(apiKey: string): void {
+export function getAllWorkspaces(): Workspace[] {
   const config = readConfig()
-  config.linearApiKey = apiKey
+  return config.workspaces ?? []
+}
+
+export function addWorkspace(workspace: Workspace): void {
+  const config = readConfig()
+  if (!config.workspaces) {
+    config.workspaces = []
+  }
+  config.workspaces.push(workspace)
   writeConfig(config)
 }
 
+export function setActiveWorkspace(index: number): void {
+  const config = readConfig()
+  if (!config.workspaces || index < 0 || index >= config.workspaces.length) {
+    throw new Error(`Invalid workspace index: ${index}`)
+  }
+  config.activeWorkspaceIndex = index
+  writeConfig(config)
+}
+
+export function removeWorkspace(index: number): void {
+  const config = readConfig()
+  if (!config.workspaces || index < 0 || index >= config.workspaces.length) {
+    throw new Error(`Invalid workspace index: ${index}`)
+  }
+  config.workspaces.splice(index, 1)
+  // Adjust active index if needed
+  if (config.activeWorkspaceIndex !== undefined) {
+    if (config.activeWorkspaceIndex >= config.workspaces.length) {
+      config.activeWorkspaceIndex = Math.max(0, config.workspaces.length - 1)
+    } else if (config.activeWorkspaceIndex > index) {
+      config.activeWorkspaceIndex -= 1
+    }
+  }
+  writeConfig(config)
+}
+
+export function getLinearApiKey(): string | undefined {
+  const workspace = getActiveWorkspace()
+  return workspace?.apiKey
+}
+
+export function setLinearApiKey(apiKey: string): void {
+  // Legacy function - for backward compatibility, update active workspace
+  const config = readConfig()
+  if (config.workspaces && config.workspaces.length > 0) {
+    const activeIndex = config.activeWorkspaceIndex ?? 0
+    if (activeIndex >= 0 && activeIndex < config.workspaces.length) {
+      config.workspaces[activeIndex]!.apiKey = apiKey
+      writeConfig(config)
+      return
+    }
+  }
+  // If no workspace exists, create one (legacy behavior)
+  const newWorkspace: Workspace = {
+    apiKey,
+    teamId: '',
+    teamName: 'Unknown Team',
+    teamKey: 'UNK',
+  }
+  addWorkspace(newWorkspace)
+  setActiveWorkspace(0)
+}
+
 export function hasLinearApiKey(): boolean {
-  const linearApiKey = getLinearApiKey()
-  return Boolean(linearApiKey && linearApiKey.trim().length > 0)
+  const workspace = getActiveWorkspace()
+  return Boolean(workspace?.apiKey && workspace.apiKey.trim().length > 0)
 }
 
 export function getOpenAIApiKey(): string | undefined {
@@ -70,14 +183,20 @@ export function hasOpenAIApiKey(): boolean {
 }
 
 export function getTeamId(): string | undefined {
-  const config = readConfig()
-  return config.teamId
+  const workspace = getActiveWorkspace()
+  return workspace?.teamId
 }
 
 export function setTeamId(teamId: string): void {
+  // Legacy function
   const config = readConfig()
-  config.teamId = teamId
-  writeConfig(config)
+  if (config.workspaces && config.workspaces.length > 0) {
+    const activeIndex = config.activeWorkspaceIndex ?? 0
+    if (activeIndex >= 0 && activeIndex < config.workspaces.length) {
+      config.workspaces[activeIndex]!.teamId = teamId
+      writeConfig(config)
+    }
+  }
 }
 
 export function hasSeenOpenAIWarning(): boolean {
