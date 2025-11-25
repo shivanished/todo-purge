@@ -14,6 +14,7 @@ export class OpenAIClient {
     filePath: string,
     lineNumber: number,
     codeContext: string,
+    fullFileContent: string,
   ): Promise<string> {
     const prompt = `You are a software engineer writing a ticket description for a TODO comment found in code.
 
@@ -22,16 +23,23 @@ TODO Description: ${todoDescription}
 File: ${filePath}
 Line: ${lineNumber}
 
-Code Context:
+Full File Content:
+\`\`\`
+${fullFileContent}
+\`\`\`
+
+Code Context (for reference - this is what will be included in the ticket):
 \`\`\`
 ${codeContext}
 \`\`\`
 
 Generate a clear, concise, and professional description for this TODO ticket. The description should:
 1. Explain what needs to be done based on the TODO comment
-2. Provide context about why this might be needed
+2. Provide context about why this might be needed based on the full file content
 3. Be written in a professional tone suitable for a project management ticket
 4. Be 2-4 sentences long
+
+Use the full file content to understand the broader context, including imports, class/function definitions, and overall file structure. This will help you create a more accurate and helpful description.
 
 Return only the description text, without any markdown formatting or additional commentary.`
 

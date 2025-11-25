@@ -8,7 +8,7 @@ import {relative} from 'node:path'
 import chalk from 'chalk'
 
 export default class Run extends Command {
-  static override description = 'Scan codebase for TODOs, create Linear tickets, and remove comments'
+  static override description = 'Scan codebase for TODOs and FIXMEs, create Linear tickets, and remove comments'
 
   static override examples = [
     '<%= config.bin %> <%= command.id %>',
@@ -110,6 +110,7 @@ export default class Run extends Command {
               relative(process.cwd(), todo.filePath),
               todo.lineNumber,
               context.fullContext,
+              context.fullFileContent,
             )
           } catch (error) {
             // Log error but continue with manual description

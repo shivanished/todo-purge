@@ -16,7 +16,7 @@ import {OpenAIClient} from '../lib/openai.js'
 import chalk from 'chalk'
 
 export default class Login extends Command {
-  static override description = 'Authenticate with Linear API and store credentials'
+  static override description = 'Authenticate with Linear API, store credentials, and optionally add an OpenAI API key'
 
   static override examples = [
     '<%= config.bin %> <%= command.id %>',

@@ -7,6 +7,7 @@ export interface TodoContext {
   contextAbove: string[]
   contextBelow: string[]
   fullContext: string
+  fullFileContent: string
 }
 
 export function extractContext(todo: TodoMatch, linesAbove: number, linesBelow: number): TodoContext {
@@ -48,6 +49,7 @@ export function extractContext(todo: TodoMatch, linesAbove: number, linesBelow: 
     contextAbove,
     contextBelow,
     fullContext,
+    fullFileContent: content,
   }
 }
 
@@ -57,13 +59,13 @@ export function formatTicketDescription(context: TodoContext, aiDescription?: st
 
   return `${description}
 
-**Location:** \`${relativePath}:${context.todo.lineNumber}\`
+  **Location:** \`${relativePath}:${context.todo.lineNumber}\`
 
-**Code Context:**
-\`\`\`
-${context.fullContext}
-\`\`\`
-`
+  **Code Context:**
+  \`\`\`
+  ${context.fullContext}
+  \`\`\`
+  `
 }
 
 export function removeTodoFromFile(todo: TodoMatch): void {
