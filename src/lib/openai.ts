@@ -16,32 +16,34 @@ export class OpenAIClient {
     codeContext: string,
     fullFileContent: string,
   ): Promise<string> {
-    const prompt = `You are a software engineer writing a ticket description for a TODO comment found in code.
+    const prompt = `
+        You are a software engineer writing a ticket description for a TODO comment found in code.
 
-TODO Description: ${todoDescription}
+        TODO Description: ${todoDescription}
 
-File: ${filePath}
-Line: ${lineNumber}
+        File: ${filePath}
+        Line: ${lineNumber}
 
-Full File Content:
-\`\`\`
-${fullFileContent}
-\`\`\`
+        Full File Content:
+        \`\`\`
+        ${fullFileContent}
+        \`\`\`
 
-Code Context (for reference - this is what will be included in the ticket):
-\`\`\`
-${codeContext}
-\`\`\`
+        Code Context (for reference - this is what will be included in the ticket):
+        \`\`\`
+        ${codeContext}
+        \`\`\`
 
-Generate a clear, concise, and professional description for this TODO ticket. The description should:
-1. Explain what needs to be done based on the TODO comment
-2. Provide context about why this might be needed based on the full file content
-3. Be written in a professional tone suitable for a project management ticket
-4. Be 2-4 sentences long
+        Generate a clear, concise, and professional description for this TODO ticket. The description should:
+        1. Explain what needs to be done based on the TODO comment
+        2. Provide context about why this might be needed based on the full file content
+        3. Be written in a professional tone suitable for a project management ticket
+        4. Be 2-4 sentences long
 
-Use the full file content to understand the broader context, including imports, class/function definitions, and overall file structure. This will help you create a more accurate and helpful description.
+        Use the full file content to understand the broader context, including imports, class/function definitions, and overall file structure. This will help you create a more accurate and helpful description.
 
-Return only the description text, without any markdown formatting or additional commentary.`
+        Return only the description text, without any markdown formatting or additional commentary.
+`
 
     const maxRetries = 2
     let lastError: Error | null = null
@@ -90,7 +92,7 @@ Return only the description text, without any markdown formatting or additional 
   async validateApiKey(): Promise<boolean> {
     try {
       await this.client.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-5-nano-2025-08-07',
         messages: [{role: 'user', content: 'test'}],
         max_tokens: 5,
       })
