@@ -7,7 +7,10 @@ import chalk from 'chalk'
 export default class Login extends Command {
   static override description = 'Authenticate with Linear API and store credentials'
 
-  static override examples = ['<%= config.bin %> <%= command.id %>']
+  static override examples = [
+    '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> --switch-team',
+  ]
 
   static override flags = {
     'switch-team': Flags.boolean({
