@@ -21,6 +21,7 @@ export default class Login extends Command {
   static override examples = [
     '<%= config.bin %> <%= command.id %>',
     '<%= config.bin %> <%= command.id %> --switch-team',
+    '<%= config.bin %> <%= command.id %> --openai-key=sk-67',
   ]
 
   static override flags = {

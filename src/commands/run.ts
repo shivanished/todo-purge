@@ -12,8 +12,7 @@ export default class Run extends Command {
 
   static override examples = [
     '<%= config.bin %> <%= command.id %>',
-    '<%= config.bin %> <%= command.id %> --context-lines=5,10',
-    '<%= config.bin %> <%= command.id %> --keep-comments',
+    '<%= config.bin %> <%= command.id %> --context-lines=5,10 --no-ai --keep-comments',
   ]
 
   static override flags = {
