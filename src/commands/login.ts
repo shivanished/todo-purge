@@ -15,6 +15,7 @@ import {
   setActiveWorkspace,
   getActiveWorkspace,
   readConfig,
+  removeWorkspace,
   type Workspace,
 } from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
@@ -94,8 +95,9 @@ export default class Login extends Command {
       this.log(chalk.cyan(`  ${index + 1}. ${workspace.teamName} (${workspace.teamKey})${activeMarker}`))
     })
     this.log(chalk.cyan(`  ${workspaces.length + 1}. Add new workspace`))
+    this.log(chalk.cyan(`  ${workspaces.length + 2}. Delete workspace`))
 
-    const choice = await this.prompt(chalk.cyan(`\nSelect workspace (1-${workspaces.length + 1}): `))
+    const choice = await this.prompt(chalk.cyan(`\nSelect option (1-${workspaces.length + 2}): `))
     const choiceIndex = parseInt(choice, 10) - 1
 
     if (isNaN(choiceIndex) || choiceIndex < 0) {
@@ -105,6 +107,9 @@ export default class Login extends Command {
     if (choiceIndex === workspaces.length) {
       // Add new workspace
       await this.addNewWorkspace()
+    } else if (choiceIndex === workspaces.length + 1) {
+      // Delete workspace
+      await this.handleDeleteWorkspace()
     } else if (choiceIndex >= 0 && choiceIndex < workspaces.length) {
       // Switch to existing workspace
       setActiveWorkspace(choiceIndex)
@@ -175,6 +180,69 @@ export default class Login extends Command {
       this.log(chalk.green('\nLogin successful! You can now run `todo-purge run` to process TODOs.'))
     } catch (error) {
       this.error(chalk.red(`Failed to validate API key: ${error instanceof Error ? error.message : String(error)}`))
+    }
+  }
+
+  private async handleDeleteWorkspace(): Promise<void> {
+    const workspaces = getAllWorkspaces()
+
+    if (workspaces.length === 0) {
+      this.log(chalk.yellow('No workspaces to delete.'))
+      return
+    }
+
+    if (workspaces.length === 1) {
+      this.log(chalk.yellow('Cannot delete the last workspace. Please add another workspace first.'))
+      return
+    }
+
+    const config = readConfig()
+    const activeIndex = config.activeWorkspaceIndex ?? 0
+
+    // Show workspaces for deletion
+    this.log(chalk.blue('\nSelect workspace to delete:'))
+    workspaces.forEach((workspace, index) => {
+      const activeMarker = index === activeIndex ? chalk.red(' (active - will switch to another)') : ''
+      this.log(chalk.cyan(`  ${index + 1}. ${workspace.teamName} (${workspace.teamKey})${activeMarker}`))
+    })
+
+    const choice = await this.prompt(chalk.cyan(`\nSelect workspace to delete (1-${workspaces.length}): `))
+    const choiceIndex = parseInt(choice, 10) - 1
+
+    if (isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= workspaces.length) {
+      this.error(chalk.red('Invalid selection.'))
+    }
+
+    const workspaceToDelete = workspaces[choiceIndex]!
+
+    // Confirm deletion
+    const confirm = await this.prompt(
+      chalk.yellow(
+        `\nAre you sure you want to delete workspace "${workspaceToDelete.teamName} (${workspaceToDelete.teamKey})"? (y/N): `,
+      ),
+    )
+
+    if (confirm.toLowerCase() !== 'y' && confirm.toLowerCase() !== 'yes') {
+      this.log(chalk.green('Deletion cancelled.'))
+      return
+    }
+
+    try {
+      removeWorkspace(choiceIndex)
+      this.log(chalk.green(`✓ Deleted workspace: ${workspaceToDelete.teamName} (${workspaceToDelete.teamKey})`))
+
+      // Show new active workspace if one exists
+      const remainingWorkspaces = getAllWorkspaces()
+      if (remainingWorkspaces.length > 0) {
+        const newConfig = readConfig()
+        const newActiveIndex = newConfig.activeWorkspaceIndex ?? 0
+        if (newActiveIndex >= 0 && newActiveIndex < remainingWorkspaces.length) {
+          const newActive = remainingWorkspaces[newActiveIndex]!
+          this.log(chalk.green(`✓ Active workspace: ${newActive.teamName} (${newActive.teamKey})`))
+        }
+      }
+    } catch (error) {
+      this.error(chalk.red(`Failed to delete workspace: ${error instanceof Error ? error.message : String(error)}`))
     }
   }
 
