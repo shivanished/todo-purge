@@ -19,6 +19,10 @@ export default class Run extends Command {
       description: 'Number of lines above and below TODO to include (format: above,below)',
       default: '5,10',
     }),
+    'keep-comments': Flags.boolean({
+      description: 'Keep TODO comments in files instead of removing them',
+      default: false,
+    }),
   }
 
   public async run(): Promise<void> {
@@ -84,9 +88,13 @@ export default class Run extends Command {
         this.log(chalk.green(`  ✓ Created ticket: ${issue.identifier} - ${issue.title}`))
         this.log(chalk.gray(`  URL: ${issue.url}\n`))
 
-        // Remove TODO from file
-        removeTodoFromFile(todo)
-        this.log(chalk.green(`  ✓ Removed TODO comment from ${relativePath}\n`))
+        // Remove TODO from file (unless --keep-comments flag is set)
+        if (!flags['keep-comments']) {
+          removeTodoFromFile(todo)
+          this.log(chalk.green(`  ✓ Removed TODO comment from ${relativePath}\n`))
+        } else {
+          this.log(chalk.gray(`  ✓ Kept TODO comment in ${relativePath} (--keep-comments flag enabled)\n`))
+        }
       } catch (error) {
         this.error(
           chalk.red(
