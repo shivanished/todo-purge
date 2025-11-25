@@ -10,8 +10,8 @@ export interface TodoMatch {
 }
 
 const TODO_PATTERNS = [
-  /\/\/\s*(TODO|FIXME)(\([^)]+\))?\s*:\s*(.+)/i, // // TODO: or // FIXME: or // TODO(issue):
-  /#\s*(TODO|FIXME)(\([^)]+\))?\s*:\s*(.+)/i, // # TODO: or # FIXME: or # TODO(issue):
+  /\/\/\s*(TODO|FIXME)(\([^)]+\))?\s*:\s*(.+)/i, //
+  /#\s*(TODO|FIXME)(\([^)]+\))?\s*:\s*(.+)/i,
 ]
 
 // Directories to exclude
