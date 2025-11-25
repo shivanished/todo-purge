@@ -103,7 +103,7 @@ export function removeTodoFromFile(todo: TodoMatch): void {
 
   const codeBeforeComment = originalLine.substring(0, commentStartIndex).trimEnd()
 
-  if (codeBeforeComment.length > 0) {
+  if (codeBeforeComment.length >= 0) {
     lines[lineIndex] = codeBeforeComment
     writeFileSync(todo.filePath, lines.join('\n'), 'utf-8')
   }

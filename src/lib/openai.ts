@@ -89,7 +89,6 @@ export class OpenAIClient {
     throw new Error(`OpenAI API error: ${lastError?.message ?? 'Unknown error'}`)
   }
 
-  // TODO: check out this function to ensure it's working
   async validateApiKey(): Promise<boolean> {
     try {
       await this.client.chat.completions.create({

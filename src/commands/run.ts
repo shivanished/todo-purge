@@ -73,20 +73,20 @@ export default class Run extends Command {
     }
 
     // Scan for TODOs
-    this.log(chalk.blue('Scanning codebase for TODO comments...'))
+    this.log(chalk.blue('Scanning codebase for TODO/FIXME comments...'))
     const todos = scanDirectory(process.cwd())
 
     if (todos.length === 0) {
-      this.log(chalk.green('No TODO comments found. Your codebase is clean!'))
+      this.log(chalk.green('No TODO/FIXME comments found. Your codebase is clean!'))
       return
     }
 
-    this.log(chalk.blue(`Found ${todos.length} TODO comment(s).\n`))
+    this.log(chalk.blue(`Found ${todos.length} TODO/FIXME comment(s).\n`))
 
     // Show warning if using AI for many TODOs
     if (useAI && todos.length > 10) {
       this.log(
-        chalk.yellow(`Generating AI descriptions for ${todos.length} TODOs. This will use your OpenAI API quota.\n`),
+        chalk.yellow(`Generating AI descriptions for ${todos.length} TODO/FIXME comments. This will use your OpenAI API quota.\n`),
       )
     }
 
@@ -134,14 +134,14 @@ export default class Run extends Command {
         // Remove TODO from file (unless --keep-comments flag is set)
         if (!flags['keep-comments']) {
           removeTodoFromFile(todo)
-          this.log(chalk.green(`  ✓ Removed TODO comment from ${relativePath}\n`))
+          this.log(chalk.green(`  ✓ Removed TODO/FIXME comment from ${relativePath}\n`))
         } else {
-          this.log(chalk.gray(`  ✓ Kept TODO comment in ${relativePath} (--keep-comments flag enabled)\n`))
+          this.log(chalk.gray(`  ✓ Kept TODO/FIXME comment in ${relativePath} (--keep-comments flag enabled)\n`))
         }
       } catch (error) {
         this.error(
           chalk.red(
-            `\nFailed to process TODO at ${relativePath}:${todo.lineNumber}\n` +
+            `\nFailed to process TODO/FIXME at ${relativePath}:${todo.lineNumber}\n` +
               `Error: ${error instanceof Error ? error.message : String(error)}\n` +
               'Stopping processing.',
           ),
@@ -149,6 +149,6 @@ export default class Run extends Command {
       }
     }
 
-    this.log(chalk.green(`\n✓ Successfully processed ${todos.length} TODO comment(s).`))
+    this.log(chalk.green(`\n✓ Successfully processed ${todos.length} TODO/FIXME comment(s).`))
   }
 }
