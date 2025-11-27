@@ -139,7 +139,11 @@ export default class Login extends Command {
   private async addNewWorkspace(): Promise<void> {
     // Prompt for API key
     this.log(chalk.blue('\nPlease enter your Linear API key.'))
-    this.log(chalk.gray('You can create one at: https://linear.app/settings/api. (Ensure you\'re in the right Linear workspace.)'))
+    this.log(
+      chalk.gray(
+        "You can create one at: https://linear.app/settings/api. (Ensure you're in the right Linear workspace.)",
+      ),
+    )
     const apiKey = await this.prompt(chalk.cyan('API Key: '))
 
     if (!apiKey || !apiKey.trim()) {
@@ -147,6 +151,7 @@ export default class Login extends Command {
     }
 
     // Validate API key
+
     this.log(chalk.blue('Validating API key...'))
     const client = new LinearClient(apiKey.trim())
 

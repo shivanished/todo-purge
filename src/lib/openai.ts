@@ -91,8 +91,8 @@ export class OpenAIClient {
 
   async validateApiKey(): Promise<boolean> {
     try {
-      await this.client.chat.completions.create({
-        model: 'gpt-5-nano-2025-08-07',
+      const completion = await this.client.chat.completions.create({
+        model: 'gpt-4.1-nano',
         messages: [{role: 'user', content: 'test'}],
         max_tokens: 5,
       })
