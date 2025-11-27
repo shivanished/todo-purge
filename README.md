@@ -20,7 +20,7 @@ $ npm install -g todo-purge
 $ todo-purge COMMAND
 running command...
 $ todo-purge (--version)
-todo-purge/0.0.0 darwin-arm64 node-v24.11.1
+todo-purge/0.1.0 darwin-arm64 node-v24.11.1
 $ todo-purge --help [COMMAND]
 USAGE
   $ todo-purge COMMAND
@@ -55,7 +55,7 @@ EXAMPLES
   $ todo-purge login --openai-key=sk-67
 ```
 
-_See code: [src/commands/login.ts](https://github.com/shivanished/todo-purge/blob/v0.0.0/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/shivanished/todo-purge/blob/v0.1.0/src/commands/login.ts)_
 
 ## `todo-purge run`
 
@@ -79,5 +79,5 @@ EXAMPLES
   $ todo-purge run --context-lines=5,10 --no-ai --keep-comments
 ```
 
-_See code: [src/commands/run.ts](https://github.com/shivanished/todo-purge/blob/v0.0.0/src/commands/run.ts)_
+_See code: [src/commands/run.ts](https://github.com/shivanished/todo-purge/blob/v0.1.0/src/commands/run.ts)_
 <!-- commandsstop -->
