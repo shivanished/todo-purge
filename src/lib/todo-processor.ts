@@ -1,6 +1,7 @@
 import {readFileSync, writeFileSync} from 'node:fs'
 import {relative} from 'node:path'
 import type {TodoMatch} from './file-scanner.js'
+import {OpenAIClient} from './openai.js'
 
 export interface TodoContext {
   todo: TodoMatch
@@ -10,39 +11,90 @@ export interface TodoContext {
   fullFileContent: string
 }
 
-export function extractContext(todo: TodoMatch, linesAbove: number, linesBelow: number): TodoContext {
-  const content = readFileSync(todo.filePath, 'utf-8')
-  const lines = content.split('\n')
+function getFixedContext(
+  todo: TodoMatch,
+  lines: string[],
+  linesAbove: number,
+  linesBelow: number,
+): { contextAbove: string[]; contextBelow: string[]; fullContext: string } {
   const lineIndex = todo.lineNumber - 1
 
-  // Extract lines above (handle file start)
   const startIndex = Math.max(0, lineIndex - linesAbove)
   const contextAbove = lines.slice(startIndex, lineIndex)
 
-  // Extract lines below (handle file end)
   const endIndex = Math.min(lines.length, lineIndex + 1 + linesBelow)
   const contextBelow = lines.slice(lineIndex + 1, endIndex)
 
-  // Create full context with line numbers
   const contextLines: string[] = []
   const contextStartLine = startIndex + 1
 
-  // Add context above
   for (let i = 0; i < contextAbove.length; i++) {
     const lineNum = contextStartLine + i
     contextLines.push(`${lineNum.toString().padStart(4, ' ')} | ${contextAbove[i]}`)
   }
 
-  // Add the TODO line itself
   contextLines.push(`${todo.lineNumber.toString().padStart(4, ' ')} | ${todo.line}`)
 
-  // Add context below
   for (let i = 0; i < contextBelow.length; i++) {
     const lineNum = todo.lineNumber + 1 + i
     contextLines.push(`${lineNum.toString().padStart(4, ' ')} | ${contextBelow[i]}`)
   }
 
   const fullContext = contextLines.join('\n')
+  return { contextAbove, contextBelow, fullContext }
+}
+
+export async function extractContext(
+  todo: TodoMatch,
+  linesAbove: number,
+  linesBelow: number,
+  useAI: boolean,
+  openAIClient?: OpenAIClient,
+): Promise<TodoContext> {
+  const content = readFileSync(todo.filePath, 'utf-8')
+  const lines = content.split('\n')
+  const lineIndex = todo.lineNumber - 1
+
+  let fullContext: string
+  let contextAbove: string[]
+  let contextBelow: string[]
+
+  // If AI is enabled, use AI to generate smart context
+  if (useAI && openAIClient) {
+    try {
+      fullContext = await openAIClient.generateContext(todo.description, todo.filePath, todo.lineNumber, content)
+      const contextLines = fullContext.split('\n')
+      const todoLineFormatted = `${todo.lineNumber.toString().padStart(4, ' ')} | ${todo.line}`
+      const todoLineIndex = contextLines.findIndex((line) => line.trim() === todoLineFormatted.trim())
+
+      if (todoLineIndex >= 0) {
+        contextAbove = contextLines.slice(0, todoLineIndex).map((line) => {
+          const match = line.match(/\s+\d+\s+\|\s+(.*)/)
+          return match ? match[1]! : line
+        })
+        contextBelow = contextLines.slice(todoLineIndex + 1).map((line) => {
+          const match = line.match(/\s+\d+\s+\|\s+(.*)/)
+          return match ? match[1]! : line
+        })
+      } else {
+        contextAbove = []
+        contextBelow = []
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      console.warn(`Failed to generate AI context, falling back to fixed lines: ${errorMessage}`)
+
+      const fixed = getFixedContext(todo, lines, linesAbove, linesBelow)
+      contextAbove = fixed.contextAbove
+      contextBelow = fixed.contextBelow
+      fullContext = fixed.fullContext
+    }
+  } else {
+    const fixed = getFixedContext(todo, lines, linesAbove, linesBelow)
+    contextAbove = fixed.contextAbove
+    contextBelow = fixed.contextBelow
+    fullContext = fixed.fullContext
+  }
 
   return {
     todo,
@@ -102,8 +154,6 @@ export function removeTodoFromFile(todo: TodoMatch): void {
   }
 
   const codeBeforeComment = originalLine.substring(0, commentStartIndex).trimEnd()
-
-
 
   if (codeBeforeComment.length >= 0) {
     lines[lineIndex] = codeBeforeComment

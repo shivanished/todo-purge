@@ -141,7 +141,13 @@ export default class Run extends Command {
       this.log(chalk.cyan(`[${i + 1}/${todos.length}] Processing: ${relativePath}:${todo.lineNumber}`))
 
       try {
-        const context = extractContext(todo, linesAbove, linesBelow)
+        // Extract context (uses AI to determine relevant context if AI is enabled)
+
+        let context
+        if (useAI && openAIClient) {
+          this.log(chalk.gray('  Analyzing code context with AI...'))
+        }
+        context = await extractContext(todo, linesAbove, linesBelow, useAI, openAIClient ?? undefined)
 
         // Try to generate AI description if enabled
         let aiDescription: string | undefined
