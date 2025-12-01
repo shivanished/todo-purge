@@ -30,6 +30,7 @@ export default class Login extends Command {
     '<%= config.bin %> <%= command.id %>',
     '<%= config.bin %> <%= command.id %> --switch-team',
     '<%= config.bin %> <%= command.id %> --openai-key=sk-67',
+    '<%= config.bin %> <%= command.id %> --gemini-key=AI67',
   ]
 
   static override flags = {
@@ -39,6 +40,9 @@ export default class Login extends Command {
     }),
     'openai-key': Flags.string({
       description: 'OpenAI API key for enhanced ticket descriptions',
+    }),
+    'gemini-key': Flags.string({
+      description: 'Gemini API key for enhanced ticket descriptions',
     }),
   }
 
@@ -356,5 +360,85 @@ export default class Login extends Command {
         chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
       )
     }
+  }
+
+  private async handleGeminiKey(providedKey?: string): Promise<void> {
+    // if (providedKey) {
+    //   if (!providedKey.trim()) {
+    //     this.error(chalk.red('OpenAI API key cannot be empty.'))
+    //   }
+
+    //   this.log(chalk.blue('Validating OpenAI API key...'))
+    //   const openAIClient = new OpenAIClient(providedKey.trim())
+
+    //   try {
+    //     const isValid = await openAIClient.validateApiKey()
+    //     if (!isValid) {
+    //       this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
+    //     }
+
+    //     setOpenAIApiKey(providedKey.trim())
+    //     setAIEnabled(true) // Enable AI by default when key is added
+    //     this.log(chalk.green('✓ OpenAI API key validated and stored.'))
+
+    //     // Show first-time warning if not seen before
+    //     if (!hasSeenOpenAIWarning()) {
+    //       this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
+    //       setOpenAIWarningSeen()
+    //     }
+    //   } catch (error) {
+    //     this.error(
+    //       chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
+    //     )
+    //   }
+
+    //   return
+    // }
+
+    // // If key already exists, don't prompt
+    // if (hasOpenAIApiKey()) {
+    //   return
+    // }
+
+    // // Otherwise, optionally prompt for it
+    // const addOpenAI = await this.prompt(
+    //   chalk.yellow('\nWould you like to add an OpenAI API key for enhanced descriptions? (y/N): '),
+    // )
+
+    // if (addOpenAI.toLowerCase() !== 'y' && addOpenAI.toLowerCase() !== 'yes') {
+    //   return
+    // }
+
+    // this.log(chalk.blue('Please enter your OpenAI API key.'))
+    // this.log(chalk.gray('You can create one at: https://platform.openai.com/api-keys'))
+    // const openAIKey = await this.prompt(chalk.cyan('OpenAI API Key: '))
+
+    // if (!openAIKey || !openAIKey.trim()) {
+    //   this.error(chalk.red('OpenAI API key cannot be empty.'))
+    // }
+
+    // this.log(chalk.blue('Validating OpenAI API key...'))
+    // const openAIClient = new OpenAIClient(openAIKey.trim())
+
+    // try {
+    //   const isValid = await openAIClient.validateApiKey()
+    //   if (!isValid) {
+    //     this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
+    //   }
+
+    //   setOpenAIApiKey(openAIKey.trim())
+    //   setAIEnabled(true) // Enable AI by default when key is added
+    //   this.log(chalk.green('✓ OpenAI API key validated and stored.'))
+
+    //   // Show first-time warning if not seen before
+    //   if (!hasSeenOpenAIWarning()) {
+    //     this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
+    //     setOpenAIWarningSeen()
+    //   }
+    // } catch (error) {
+    //   this.error(
+    //     chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
+    //   )
+    // }
   }
 }

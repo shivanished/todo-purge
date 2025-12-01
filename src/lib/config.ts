@@ -13,6 +13,7 @@ export interface Config {
   workspaces?: Workspace[]
   activeWorkspaceIndex?: number // 0-based index
   openAIApiKey?: string
+  geminiApiKey?: string
   hasSeenOpenAIWarning?: boolean
   aiEnabled?: boolean
   aiContextModel?: string
