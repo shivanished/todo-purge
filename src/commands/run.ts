@@ -1,8 +1,5 @@
 import {Command, Flags} from '@oclif/core'
 import {
-  getLinearApiKey,
-  getTeamId,
-  hasLinearApiKey,
   hasOpenAIApiKey,
   getOpenAIApiKey,
   getActiveWorkspace,

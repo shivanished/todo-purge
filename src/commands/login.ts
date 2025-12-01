@@ -1,11 +1,6 @@
 import {Command, Flags} from '@oclif/core'
 import {createInterface} from 'node:readline'
 import {
-  setLinearApiKey,
-  setTeamId,
-  hasLinearApiKey,
-  getTeamId,
-  getLinearApiKey,
   setOpenAIApiKey,
   hasOpenAIApiKey,
   hasSeenAIWarning,
@@ -17,6 +12,7 @@ import {
   readConfig,
   removeWorkspace,
   setAIEnabled,
+  setGeminiApiKey,
   type Workspace,
 } from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
@@ -64,7 +60,7 @@ export default class Login extends Command {
     const {flags} = await this.parse(Login)
     const switchingTeam = Boolean(flags['switch-team'])
 
-    if (flags['openai-key'] && hasLinearApiKey() && !switchingTeam) {
+    if (flags['openai-key'] && getActiveWorkspace() && !switchingTeam) {
       await this.handleOpenAIKey(flags['openai-key'])
       return
     }
@@ -72,12 +68,14 @@ export default class Login extends Command {
     if (switchingTeam) {
       await this.handleSwitchTeam()
       await this.handleOpenAIKey(flags['openai-key'])
+      await this.handleGeminiKey(flags['gemini-key'])
       return
     }
 
     // Regular login flow - add a new workspace
     await this.handleNewWorkspace()
     await this.handleOpenAIKey(flags['openai-key'])
+    await this.handleGeminiKey(flags['gemini-key'])
   }
 
   private async handleSwitchTeam(): Promise<void> {
@@ -303,7 +301,11 @@ export default class Login extends Command {
 
         // Show first-time warning if not seen before
         if (!hasSeenAIWarning()) {
-          this.log(chalk.yellow('\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
+          this.log(
+            chalk.yellow(
+              '\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.',
+            ),
+          )
           setAIWarningSeen()
         }
       } catch (error) {
@@ -352,7 +354,11 @@ export default class Login extends Command {
 
       // Show first-time warning if not seen before
       if (!hasSeenAIWarning()) {
-        this.log(chalk.yellow('\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
+        this.log(
+          chalk.yellow(
+            '\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.',
+          ),
+        )
         setAIWarningSeen()
       }
     } catch (error) {
@@ -367,20 +373,16 @@ export default class Login extends Command {
     //   if (!providedKey.trim()) {
     //     this.error(chalk.red('OpenAI API key cannot be empty.'))
     //   }
-
     //   this.log(chalk.blue('Validating OpenAI API key...'))
     //   const openAIClient = new OpenAIClient(providedKey.trim())
-
     //   try {
     //     const isValid = await openAIClient.validateApiKey()
     //     if (!isValid) {
     //       this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
     //     }
-
     //     setOpenAIApiKey(providedKey.trim())
     //     setAIEnabled(true) // Enable AI by default when key is added
     //     this.log(chalk.green('✓ OpenAI API key validated and stored.'))
-
     //     // Show first-time warning if not seen before
     //     if (!hasSeenAIWarning()) {
     //       this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
@@ -391,45 +393,35 @@ export default class Login extends Command {
     //       chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
     //     )
     //   }
-
     //   return
     // }
-
     // // If key already exists, don't prompt
     // if (hasOpenAIApiKey()) {
     //   return
     // }
-
     // // Otherwise, optionally prompt for it
     // const addOpenAI = await this.prompt(
     //   chalk.yellow('\nWould you like to add an OpenAI API key for enhanced descriptions? (y/N): '),
     // )
-
     // if (addOpenAI.toLowerCase() !== 'y' && addOpenAI.toLowerCase() !== 'yes') {
     //   return
     // }
-
     // this.log(chalk.blue('Please enter your OpenAI API key.'))
     // this.log(chalk.gray('You can create one at: https://platform.openai.com/api-keys'))
     // const openAIKey = await this.prompt(chalk.cyan('OpenAI API Key: '))
-
     // if (!openAIKey || !openAIKey.trim()) {
     //   this.error(chalk.red('OpenAI API key cannot be empty.'))
     // }
-
     // this.log(chalk.blue('Validating OpenAI API key...'))
     // const openAIClient = new OpenAIClient(openAIKey.trim())
-
     // try {
     //   const isValid = await openAIClient.validateApiKey()
     //   if (!isValid) {
     //     this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
     //   }
-
     //   setOpenAIApiKey(openAIKey.trim())
     //   setAIEnabled(true) // Enable AI by default when key is added
     //   this.log(chalk.green('✓ OpenAI API key validated and stored.'))
-
     //   // Show first-time warning if not seen before
     //   if (!hasSeenAIWarning()) {
     //     this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
