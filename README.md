@@ -102,10 +102,22 @@ Just don't add an OpenAI key, or remove it from your config file.
 
 ### AI Costs
 
-- Currently supporting `gpt-4.1-nano` for context selection (cost-effective)
-- Currently supporting `gpt-4.1-nano` for descriptions (affordable)
 - You'll see a warning if processing more than 10 TODOs at once
 - AI is only used when enabled - no charges if you don't configure a key
+
+### Supported Models
+
+The following models are supported for AI features:
+
+- `gpt-4.1`
+- `gpt-4.1-nano`
+- `gpt-5.1`
+- `gpt-5-nano`
+- `gpt-5-mini`
+- `gpt-5`
+- `gpt-5-pro`
+
+You can configure which model to use for context selection and descriptions separately using the `config` command (see [`todo-purge config`](#todo-purge-config) below).
 
 ## Managing Multiple Workspaces
 
@@ -220,6 +232,56 @@ todo-purge run --context-lines=10,20
 # Combine flags
 todo-purge run --keep-comments --no-ai
 ```
+
+### `todo-purge config`
+
+Configure todo-purge settings including AI models and workspace management.
+
+**Interactive mode:**
+
+```bash
+todo-purge config
+```
+
+**Set a configuration value:**
+
+```bash
+todo-purge config set <key> <value>
+```
+
+**Get a configuration value:**
+
+```bash
+todo-purge config get <key>
+```
+
+**Available configuration keys:**
+
+- `ai.enabled` - Enable/disable AI features (true/false)
+- `ai.context-model` - Model to use for context selection (see [Supported Models](#supported-models))
+- `ai.description-model` - Model to use for description generation (see [Supported Models](#supported-models))
+- `workspace.active` - Switch active workspace (number or workspace name/key)
+
+**Examples:**
+
+```bash
+# Interactive configuration menu
+todo-purge config
+
+# Set context model
+todo-purge config set ai.context-model gpt-5-mini
+
+# Set description model
+todo-purge config set ai.description-model gpt-5
+
+# Enable AI
+todo-purge config set ai.enabled true
+
+# Get current context model
+todo-purge config get ai.context-model
+```
+
+**Note:** Only the models listed in [Supported Models](#supported-models) are accepted. Invalid models will be rejected.
 
 ## How It Works
 
