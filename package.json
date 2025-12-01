@@ -1,7 +1,7 @@
 {
   "name": "todo-purge",
   "description": "A CLI tool to clean TODOs and FIXMEs out of your code and replace them with Linear tickets.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "author": "Shivansh Soni",
   "bin": {
     "todo-purge": "./bin/run.js"
