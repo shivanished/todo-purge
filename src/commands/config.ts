@@ -127,9 +127,6 @@ export default class Config extends Command {
       default:
         this.error(chalk.red('Invalid selection.'))
     }
-
-    // Show menu again after action
-    await this.showInteractiveMenu()
   }
 
   private async handleToggleAI(): Promise<void> {
