@@ -52,12 +52,12 @@ export class GeminiClient {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const result = await this.client.models.generateContent({
-            model: this.descriptionModel,
-            contents: prompt,
-            config: {
-              temperature: 0.7,
-              maxOutputTokens: 300,
-            },
+          model: this.descriptionModel,
+          contents: prompt,
+          config: {
+            temperature: 0.7,
+            maxOutputTokens: 300,
+          },
         })
 
         const response = await result.text
@@ -102,51 +102,51 @@ export class GeminiClient {
     const numberedLines = lines.map((line, index) => `${(index + 1).toString().padStart(4, ' ')} | ${line}`).join('\n')
 
     const prompt = `
-You are a software engineer analyzing code to determine the most relevant context for a TODO comment.
+        You are a software engineer analyzing code to determine the most relevant context for a TODO comment.
 
-TODO Description: ${todoDescription}
-File: ${filePath}
-TODO Line Number: ${lineNumber}
-TODO Line: ${todoLine}
+        TODO Description: ${todoDescription}
+        File: ${filePath}
+        TODO Line Number: ${lineNumber}
+        TODO Line: ${todoLine}
 
-Full File Content (with line numbers):
-\`\`\`
-${numberedLines}
-\`\`\`
+        Full File Content (with line numbers):
+        \`\`\`
+        ${numberedLines}
+        \`\`\`
 
-Your task: Select the most relevant code context around the TODO comment (line ${lineNumber}). 
+        Your task: Select the most relevant code context around the TODO comment (line ${lineNumber}). 
 
-Guidelines:
-1. Include the TODO line itself
-2. Include relevant code above and below that helps understand what needs to be done
-3. Focus on:
-   - The function/class/method containing the TODO
-   - Related variable declarations and imports
-   - Related function calls or logic flow
-   - Type definitions or interfaces if relevant
-4. Keep it concise - aim for 10-30 lines total, but prioritize relevance over strict limits
-5. Do NOT include unrelated code from other functions/classes unless directly relevant
-6. Maintain the exact format with line numbers: "    X | code line"
+        Guidelines:
+        1. Include the TODO line itself
+        2. Include relevant code above and below that helps understand what needs to be done
+        3. Focus on:
+        - The function/class/method containing the TODO
+        - Related variable declarations and imports
+        - Related function calls or logic flow
+        - Type definitions or interfaces if relevant
+        4. Keep it concise - aim for 10-30 lines total, but prioritize relevance over strict limits
+        5. Do NOT include unrelated code from other functions/classes unless directly relevant
+        6. Maintain the exact format with line numbers: "    X | code line"
 
-Return ONLY the selected context lines in the exact format shown above (with line numbers and pipe separator), nothing else. Do not include markdown code blocks or any other text.
-`
+        Return ONLY the selected context lines in the exact format shown above (with line numbers and pipe separator), nothing else. Do not include markdown code blocks or any other text.
+    `
 
     const maxRetries = 2
     let lastError: Error | null = null
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const model = this.client.getGenerativeModel({
+        const result = await this.client.models.generateContent({
           model: this.contextModel,
-          generationConfig: {
+          contents: prompt,
+          config: {
             temperature: 0.3,
             maxOutputTokens: 2000,
           },
         })
 
-        const result = await model.generateContent(prompt)
-        const response = await result.response
-        const context = response.text().trim()
+        const response = await result.text
+        const context = response?.trim()
 
         if (!context) {
           throw new Error('Gemini API returned empty context')
@@ -180,13 +180,13 @@ Return ONLY the selected context lines in the exact format shown above (with lin
 
   async validateApiKey(): Promise<boolean> {
     try {
-      const model = this.client.getGenerativeModel({
+      await this.client.models.generateContent({
         model: 'gemini-1.5-pro',
-        generationConfig: {
+        contents: 'test',
+        config: {
           maxOutputTokens: 5,
         },
       })
-      await model.generateContent('test')
       return true
     } catch {
       return false
