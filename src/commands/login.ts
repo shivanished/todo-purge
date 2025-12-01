@@ -8,8 +8,8 @@ import {
   getLinearApiKey,
   setOpenAIApiKey,
   hasOpenAIApiKey,
-  hasSeenOpenAIWarning,
-  setOpenAIWarningSeen,
+  hasSeenAIWarning,
+  setAIWarningSeen,
   getAllWorkspaces,
   addWorkspace,
   setActiveWorkspace,
@@ -302,9 +302,9 @@ export default class Login extends Command {
         this.log(chalk.green('✓ OpenAI API key validated and stored.'))
 
         // Show first-time warning if not seen before
-        if (!hasSeenOpenAIWarning()) {
-          this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
-          setOpenAIWarningSeen()
+        if (!hasSeenAIWarning()) {
+          this.log(chalk.yellow('\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
+          setAIWarningSeen()
         }
       } catch (error) {
         this.error(
@@ -351,9 +351,9 @@ export default class Login extends Command {
       this.log(chalk.green('✓ OpenAI API key validated and stored.'))
 
       // Show first-time warning if not seen before
-      if (!hasSeenOpenAIWarning()) {
-        this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
-        setOpenAIWarningSeen()
+      if (!hasSeenAIWarning()) {
+        this.log(chalk.yellow('\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
+        setAIWarningSeen()
       }
     } catch (error) {
       this.error(
@@ -382,7 +382,7 @@ export default class Login extends Command {
     //     this.log(chalk.green('✓ OpenAI API key validated and stored.'))
 
     //     // Show first-time warning if not seen before
-    //     if (!hasSeenOpenAIWarning()) {
+    //     if (!hasSeenAIWarning()) {
     //       this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
     //       setOpenAIWarningSeen()
     //     }
@@ -431,7 +431,7 @@ export default class Login extends Command {
     //   this.log(chalk.green('✓ OpenAI API key validated and stored.'))
 
     //   // Show first-time warning if not seen before
-    //   if (!hasSeenOpenAIWarning()) {
+    //   if (!hasSeenAIWarning()) {
     //     this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
     //     setOpenAIWarningSeen()
     //   }

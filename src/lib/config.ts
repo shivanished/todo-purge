@@ -14,7 +14,7 @@ export interface Config {
   activeWorkspaceIndex?: number // 0-based index
   openAIApiKey?: string
   geminiApiKey?: string
-  hasSeenOpenAIWarning?: boolean
+  hasSeenAIWarning?: boolean
   aiEnabled?: boolean
   aiContextModel?: string
   aiDescriptionModel?: string
@@ -186,6 +186,22 @@ export function hasOpenAIApiKey(): boolean {
   return Boolean(openAIApiKey && openAIApiKey.trim().length > 0)
 }
 
+export function getGeminiApiKey(): string | undefined {
+  const config = readConfig()
+  return config.geminiApiKey
+}
+
+export function setGeminiApiKey(geminiApiKey: string): void {
+  const config = readConfig()
+  config.geminiApiKey = geminiApiKey
+  writeConfig(config)
+}
+
+export function hasGeminiApiKey(): boolean {
+  const geminiApiKey = getGeminiApiKey()
+  return Boolean(geminiApiKey && geminiApiKey.trim().length > 0)
+}
+
 export function getTeamId(): string | undefined {
   const workspace = getActiveWorkspace()
   return workspace?.teamId
@@ -203,14 +219,14 @@ export function setTeamId(teamId: string): void {
   }
 }
 
-export function hasSeenOpenAIWarning(): boolean {
+export function hasSeenAIWarning(): boolean {
   const config = readConfig()
-  return Boolean(config.hasSeenOpenAIWarning)
+  return Boolean(config.hasSeenAIWarning)
 }
 
-export function setOpenAIWarningSeen(): void {
+export function setAIWarningSeen(): void {
   const config = readConfig()
-  config.hasSeenOpenAIWarning = true
+  config.hasSeenAIWarning = true
   writeConfig(config)
 }
 
