@@ -28,7 +28,7 @@ todo-purge login
 
 This will:
 
-- Prompt you for your Linear API key (get one at [linear.app/settings/api](https://linear.app/settings/api))
+- Prompt you for your Linear API key (create one at Settings > Security & Access > Personal API Keys, or visit [linear.app/settings/api](https://linear.app/settings/api))
   - **Important:** Linear API keys are workspace-specific. Each workspace requires its own API key.
 - Validate the API key
 - Let you select which team/workspace to use (the API key determines which workspace you can access)
@@ -140,7 +140,7 @@ todo-purge login  # Choose "Add new workspace" when prompted
 
 **To create a Linear API key for a workspace:**
 
-1. Go to [linear.app/settings/api](https://linear.app/settings/api)
+1. Navigate to **Settings > Security & Access > Personal API Keys** in Linear (or visit [linear.app/settings/api](https://linear.app/settings/api))
 2. Make sure you're in the correct workspace (check the workspace selector)
 3. Create a new API key
 4. Copy it and use it when adding that workspace to the tool
@@ -335,7 +335,7 @@ todo-purge run --no-ai
 - Node.js >= 18.0.0
 - A Linear account with API access
   - **Note:** You'll need a separate API key for each Linear workspace you want to use
-  - Create API keys at [linear.app/settings/api](https://linear.app/settings/api) (make sure you're in the correct workspace)
+  - Create API keys at **Settings > Security & Access > Personal API Keys** in Linear (or visit [linear.app/settings/api](https://linear.app/settings/api)) - make sure you're in the correct workspace
 - (Optional) OpenAI API key for AI features (one key works for all workspaces)
 
 ## License
