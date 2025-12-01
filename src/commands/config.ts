@@ -22,14 +22,13 @@ export default class Config extends Command {
     '<%= config.bin %> <%= command.id %>',
     '<%= config.bin %> <%= command.id %> set ai.enabled false',
     '<%= config.bin %> <%= command.id %> get ai.context-model',
-    '<%= config.bin %> <%= command.id %> list',
   ]
 
   static override flags = {}
 
   static override args = {
     subcommand: Args.string({
-      description: 'Subcommand: set, get, or list',
+      description: 'Subcommand: set or get',
       required: false,
     }),
     key: Args.string({
@@ -70,11 +69,6 @@ export default class Config extends Command {
       return
     }
 
-    if (args.subcommand === 'list') {
-      await this.handleList()
-      return
-    }
-
     // Interactive menu if no subcommand
     await this.showInteractiveMenu()
   }
@@ -104,10 +98,9 @@ export default class Config extends Command {
     this.log(chalk.cyan('  2. Set context model'))
     this.log(chalk.cyan('  3. Set description model'))
     this.log(chalk.cyan('  4. Switch active workspace'))
-    this.log(chalk.cyan('  5. View full configuration'))
-    this.log(chalk.cyan('  6. Exit'))
+    this.log(chalk.cyan('  5. Exit'))
 
-    const choice = await this.prompt(chalk.cyan('\nSelect option (1-6): '))
+    const choice = await this.prompt(chalk.cyan('\nSelect option (1-5): '))
 
     switch (choice.trim()) {
       case '1':
@@ -123,9 +116,6 @@ export default class Config extends Command {
         await this.handleSwitchWorkspace()
         break
       case '5':
-        await this.handleList()
-        break
-      case '6':
         this.log(chalk.green('Exiting...'))
         return
       default:
@@ -291,39 +281,6 @@ export default class Config extends Command {
       default:
         this.error(chalk.red(`Unknown config key: ${key}. Available keys: ai.enabled, ai.context-model, ai.description-model, workspace.active`))
     }
-  }
-
-  private async handleList(): Promise<void> {
-    const config = readConfig()
-    const activeWorkspace = getActiveWorkspace()
-    const workspaces = getAllWorkspaces()
-
-    this.log(chalk.blue('\n=== Full Configuration ===\n'))
-
-    this.log(chalk.cyan('AI Settings:'))
-    this.log(`  Enabled: ${getAIEnabled() ? chalk.green('true') : chalk.red('false')}`)
-    this.log(`  Context Model: ${chalk.yellow(getAIContextModel())}`)
-    this.log(`  Description Model: ${chalk.yellow(getAIDescriptionModel())}`)
-    this.log(`  OpenAI Key Configured: ${hasOpenAIApiKey() ? chalk.green('Yes') : chalk.red('No')}`)
-
-    this.log(chalk.cyan('\nWorkspace Settings:'))
-    if (activeWorkspace) {
-      const activeIndex = config.activeWorkspaceIndex ?? 0
-      this.log(`  Active Workspace: ${chalk.green(`${activeIndex + 1}. ${activeWorkspace.teamName} (${activeWorkspace.teamKey})`)}`)
-    } else {
-      this.log(`  Active Workspace: ${chalk.red('None')}`)
-    }
-    this.log(`  Total Workspaces: ${workspaces.length}`)
-
-    if (workspaces.length > 0) {
-      this.log(chalk.cyan('\nAll Workspaces:'))
-      workspaces.forEach((workspace, index) => {
-        const activeMarker = index === (config.activeWorkspaceIndex ?? 0) ? chalk.green(' (active)') : ''
-        this.log(`  ${index + 1}. ${workspace.teamName} (${workspace.teamKey})${activeMarker}`)
-      })
-    }
-
-    this.log('')
   }
 }
 
