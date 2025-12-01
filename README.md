@@ -29,8 +29,9 @@ todo-purge login
 This will:
 
 - Prompt you for your Linear API key (get one at [linear.app/settings/api](https://linear.app/settings/api))
+  - **Important:** Linear API keys are workspace-specific. Each workspace requires its own API key.
 - Validate the API key
-- Let you select which team/workspace to use
+- Let you select which team/workspace to use (the API key determines which workspace you can access)
 - Optionally prompt you to add an OpenAI API key for AI features
 
 **Adding OpenAI key during login:**
@@ -108,17 +109,41 @@ Just don't add an OpenAI key, or remove it from your config file.
 
 ## Managing Multiple Workspaces
 
+### Understanding Linear API Keys
+
+**Important:** Linear API keys are workspace-specific, not account-wide. This means:
+
+- Each Linear workspace requires its own API key
+- If you have 3 workspaces (A, B, C), you need 3 separate API keys
+- When you create an API key in Linear, it's scoped to that specific workspace
+- The tool stores each workspace with its own API key
+
+This is why the tool supports multiple workspaces - each workspace you add will have its own API key associated with it.
+
 ### Adding Multiple Workspaces
 
-You can work with multiple Linear workspaces:
+You can work with multiple Linear workspaces. Each workspace needs its own API key:
 
 ```bash
-# Add your first workspace
+# Add your first workspace (workspace A)
 todo-purge login
+# Enter API key for workspace A
 
-# Add another workspace
+# Add another workspace (workspace B)
 todo-purge login  # Choose "Add new workspace" when prompted
+# Enter API key for workspace B
+
+# Add workspace C
+todo-purge login  # Choose "Add new workspace" when prompted
+# Enter API key for workspace C
 ```
+
+**To create a Linear API key for a workspace:**
+
+1. Go to [linear.app/settings/api](https://linear.app/settings/api)
+2. Make sure you're in the correct workspace (check the workspace selector)
+3. Create a new API key
+4. Copy it and use it when adding that workspace to the tool
 
 ### Switching Between Workspaces
 
@@ -136,9 +161,10 @@ This will:
 ### Active Workspace
 
 - **Only one workspace is active at a time**
-- When you run `todo-purge run`, it uses your **active workspace**
+- When you run `todo-purge run`, it uses your **active workspace** and its associated API key
 - The active workspace is shown with a green "(active)" marker when switching teams
 - Your active workspace is validated before processing TODOs
+- Each workspace stores its own API key, so switching workspaces automatically uses the correct key
 
 ## Command Reference
 
@@ -238,21 +264,29 @@ todo-purge login --openai-key=sk-...
 todo-purge run
 ```
 
-### Working with Multiple Teams
+### Working with Multiple Workspaces
 
 ```bash
-# Switch to team A
-todo-purge login --switch-team
-# Select team A
+# Add workspace A (with its API key)
+todo-purge login
+# Enter API key for workspace A, select team
 
-# Process TODOs for team A
+# Add workspace B (with its API key)
+todo-purge login
+# Choose "Add new workspace", enter API key for workspace B, select team
+
+# Switch to workspace A
+todo-purge login --switch-team
+# Select workspace A
+
+# Process TODOs for workspace A (uses workspace A's API key)
 todo-purge run
 
-# Switch to team B
+# Switch to workspace B
 todo-purge login --switch-team
-# Select team B
+# Select workspace B
 
-# Process TODOs for team B
+# Process TODOs for workspace B (uses workspace B's API key)
 todo-purge run
 ```
 
@@ -281,12 +315,14 @@ todo-purge run --no-ai
 **"API key is invalid"**
 
 - Your Linear API key may have expired or been revoked
-- Run `todo-purge login --switch-team` to update credentials
+- The API key might be for a different workspace than expected
+- Run `todo-purge login --switch-team` to update the API key for that workspace
 
 **"Team is not accessible"**
 
+- The API key you're using might be for a different workspace
 - You may have lost access to the team, or the team ID changed
-- Run `todo-purge login --switch-team` to reconfigure
+- Run `todo-purge login --switch-team` to reconfigure or update the API key
 
 **AI not working?**
 
@@ -298,7 +334,9 @@ todo-purge run --no-ai
 
 - Node.js >= 18.0.0
 - A Linear account with API access
-- (Optional) OpenAI API key for AI features
+  - **Note:** You'll need a separate API key for each Linear workspace you want to use
+  - Create API keys at [linear.app/settings/api](https://linear.app/settings/api) (make sure you're in the correct workspace)
+- (Optional) OpenAI API key for AI features (one key works for all workspaces)
 
 ## License
 
