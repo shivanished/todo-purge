@@ -111,11 +111,11 @@ The following models are supported for AI features:
 
 - `gpt-4.1`
 - `gpt-4.1-nano`
-- `gpt-5.1`
+- `gpt-5`
 - `gpt-5-nano`
 - `gpt-5-mini`
-- `gpt-5`
 - `gpt-5-pro`
+- `gpt-5.1`
 
 You can configure which model to use for context selection and descriptions separately using the `config` command (see [`todo-purge config`](#todo-purge-config) below).
 
