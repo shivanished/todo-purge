@@ -154,6 +154,7 @@ export default class Config extends Command {
   private async handleSetContextModel(): Promise<void> {
     const current = getAIContextModel()
     this.log(chalk.blue(`Current context model: ${chalk.yellow(current)}`))
+    this.log(chalk.gray('Use the model name as printed ahove ommitting date suffix (e.g., gpt-4.1-nano not gpt-4.1-nano-2025-11-30) .'))
     const newModel = await this.prompt(chalk.cyan('Enter new context model (or press Enter to keep current): '))
 
     if (newModel.trim()) {
