@@ -1,12 +1,12 @@
-import {GoogleGenerativeAI} from '@google/genai'
+import {GoogleGenAI} from '@google/genai'
 
 export class GeminiClient {
-  private client: GoogleGenerativeAI
+  private client: GoogleGenAI
   private contextModel: string
   private descriptionModel: string
 
   constructor(apiKey: string, contextModel?: string, descriptionModel?: string) {
-    this.client = new GoogleGenerativeAI(apiKey)
+    this.client = new GoogleGenAI({apiKey: apiKey})
     this.contextModel = contextModel ?? 'gemini-1.5-pro'
     this.descriptionModel = descriptionModel ?? 'gemini-1.5-pro'
   }
@@ -45,24 +45,23 @@ export class GeminiClient {
         Use the full file content to understand the broader context, including imports, class/function definitions, and overall file structure. This will help you create a more accurate and helpful description.
 
         Return only the description text, without any markdown formatting or additional commentary.
-`
-
+    `
     const maxRetries = 2
     let lastError: Error | null = null
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const model = this.client.getGenerativeModel({
-          model: this.descriptionModel,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 300,
-          },
+        const result = await this.client.models.generateContent({
+            model: this.descriptionModel,
+            contents: prompt,
+            config: {
+              temperature: 0.7,
+              maxOutputTokens: 300,
+            },
         })
 
-        const result = await model.generateContent(prompt)
-        const response = await result.response
-        const description = response.text().trim()
+        const response = await result.text
+        const description = response?.trim()
 
         if (!description) {
           throw new Error('Gemini API returned empty response')

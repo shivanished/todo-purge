@@ -48,7 +48,6 @@ export class OpenAIClient {
 
         Return only the description text, without any markdown formatting or additional commentary.
 `
-
     const maxRetries = 2
     let lastError: Error | null = null
 
