@@ -1,1 +1,0 @@
-{"root":["./src/index.ts","./src/commands/config.ts","./src/commands/login.ts","./src/commands/run.ts","./src/lib/config.ts","./src/lib/file-scanner.ts","./src/lib/linear.ts","./src/lib/openai.ts","./src/lib/todo-processor.ts"],"version":"5.9.3"}

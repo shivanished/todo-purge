@@ -15,7 +15,9 @@ import {
 } from '../lib/config.js'
 import chalk from 'chalk'
 
-const VALID_MODELS = ['gpt-4.1', 'gpt-4.1-nano', 'gpt-5.1', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'gpt-5-pro'] as const
+const OPENAI_MODELS = ['gpt-4.1', 'gpt-4.1-nano', 'gpt-5.1', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'gpt-5-pro'] as const
+const GEMINI_MODELS = ['gemini-3-pro-preview', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'] as const
+const VALID_MODELS = [...OPENAI_MODELS, ...GEMINI_MODELS] as const
 
 function isValidModel(model: string): boolean {
   return VALID_MODELS.includes(model as (typeof VALID_MODELS)[number])
@@ -154,7 +156,7 @@ export default class Config extends Command {
   private async handleSetContextModel(): Promise<void> {
     const current = getAIContextModel()
     this.log(chalk.blue(`Current context model: ${chalk.yellow(current)}`))
-    this.log(chalk.gray('Use the model name as printed ahove ommitting date suffix (e.g., gpt-4.1-nano not gpt-4.1-nano-2025-11-30) .'))
+    this.log(chalk.gray('Use the model name as listed in the supported models section of the docs: https://github.com/shivanished/todo-purge'))
     const newModel = await this.prompt(chalk.cyan('Enter new context model (or press Enter to keep current): '))
 
     if (newModel.trim()) {
