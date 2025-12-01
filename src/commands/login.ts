@@ -13,10 +13,12 @@ import {
   removeWorkspace,
   setAIEnabled,
   setGeminiApiKey,
+  hasGeminiApiKey,
   type Workspace,
 } from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
 import {OpenAIClient} from '../lib/openai.js'
+import {GeminiClient} from '../lib/gemini.js'
 import chalk from 'chalk'
 
 export default class Login extends Command {
@@ -62,6 +64,11 @@ export default class Login extends Command {
 
     if (flags['openai-key'] && getActiveWorkspace() && !switchingTeam) {
       await this.handleOpenAIKey(flags['openai-key'])
+      return
+    }
+
+    if (flags['gemini-key'] && getActiveWorkspace() && !switchingTeam) {
+      await this.handleGeminiKey(flags['gemini-key'])
       return
     }
 
@@ -369,68 +376,91 @@ export default class Login extends Command {
   }
 
   private async handleGeminiKey(providedKey?: string): Promise<void> {
-    // if (providedKey) {
-    //   if (!providedKey.trim()) {
-    //     this.error(chalk.red('OpenAI API key cannot be empty.'))
-    //   }
-    //   this.log(chalk.blue('Validating OpenAI API key...'))
-    //   const openAIClient = new OpenAIClient(providedKey.trim())
-    //   try {
-    //     const isValid = await openAIClient.validateApiKey()
-    //     if (!isValid) {
-    //       this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
-    //     }
-    //     setOpenAIApiKey(providedKey.trim())
-    //     setAIEnabled(true) // Enable AI by default when key is added
-    //     this.log(chalk.green('✓ OpenAI API key validated and stored.'))
-    //     // Show first-time warning if not seen before
-    //     if (!hasSeenAIWarning()) {
-    //       this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
-    //       setOpenAIWarningSeen()
-    //     }
-    //   } catch (error) {
-    //     this.error(
-    //       chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
-    //     )
-    //   }
-    //   return
-    // }
-    // // If key already exists, don't prompt
-    // if (hasOpenAIApiKey()) {
-    //   return
-    // }
-    // // Otherwise, optionally prompt for it
-    // const addOpenAI = await this.prompt(
-    //   chalk.yellow('\nWould you like to add an OpenAI API key for enhanced descriptions? (y/N): '),
-    // )
-    // if (addOpenAI.toLowerCase() !== 'y' && addOpenAI.toLowerCase() !== 'yes') {
-    //   return
-    // }
-    // this.log(chalk.blue('Please enter your OpenAI API key.'))
-    // this.log(chalk.gray('You can create one at: https://platform.openai.com/api-keys'))
-    // const openAIKey = await this.prompt(chalk.cyan('OpenAI API Key: '))
-    // if (!openAIKey || !openAIKey.trim()) {
-    //   this.error(chalk.red('OpenAI API key cannot be empty.'))
-    // }
-    // this.log(chalk.blue('Validating OpenAI API key...'))
-    // const openAIClient = new OpenAIClient(openAIKey.trim())
-    // try {
-    //   const isValid = await openAIClient.validateApiKey()
-    //   if (!isValid) {
-    //     this.error(chalk.red('Invalid OpenAI API key. Please check your API key and try again.'))
-    //   }
-    //   setOpenAIApiKey(openAIKey.trim())
-    //   setAIEnabled(true) // Enable AI by default when key is added
-    //   this.log(chalk.green('✓ OpenAI API key validated and stored.'))
-    //   // Show first-time warning if not seen before
-    //   if (!hasSeenAIWarning()) {
-    //     this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
-    //     setOpenAIWarningSeen()
-    //   }
-    // } catch (error) {
-    //   this.error(
-    //     chalk.red(`Failed to validate OpenAI API key: ${error instanceof Error ? error.message : String(error)}`),
-    //   )
-    // }
+    // If key was provided via flag, use it
+    if (providedKey) {
+      if (!providedKey.trim()) {
+        this.error(chalk.red('Gemini API key cannot be empty.'))
+      }
+
+      this.log(chalk.blue('Validating Gemini API key...'))
+      const geminiClient = new GeminiClient(providedKey.trim())
+
+      try {
+        const isValid = await geminiClient.validateApiKey()
+        if (!isValid) {
+          this.error(chalk.red('Invalid Gemini API key. Please check your API key and try again.'))
+        }
+
+        setGeminiApiKey(providedKey.trim())
+        setAIEnabled(true) // Enable AI by default when key is added
+        this.log(chalk.green('✓ Gemini API key validated and stored.'))
+
+        // Show first-time warning if not seen before
+        if (!hasSeenAIWarning()) {
+          this.log(
+            chalk.yellow(
+              '\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.',
+            ),
+          )
+          setAIWarningSeen()
+        }
+      } catch (error) {
+        this.error(
+          chalk.red(`Failed to validate Gemini API key: ${error instanceof Error ? error.message : String(error)}`),
+        )
+      }
+
+      return
+    }
+
+    // If key already exists, don't prompt
+    if (hasGeminiApiKey()) {
+      return
+    }
+
+    // Otherwise, optionally prompt for it
+    const addGemini = await this.prompt(
+      chalk.yellow('\nWould you like to add a Gemini API key for enhanced descriptions? (y/N): '),
+    )
+
+    if (addGemini.toLowerCase() !== 'y' && addGemini.toLowerCase() !== 'yes') {
+      return
+    }
+
+    this.log(chalk.blue('Please enter your Gemini API key.'))
+    this.log(chalk.gray('You can create one at: https://aistudio.google.com/app/apikey'))
+    const geminiKey = await this.prompt(chalk.cyan('Gemini API Key: '))
+
+    if (!geminiKey || !geminiKey.trim()) {
+      this.error(chalk.red('Gemini API key cannot be empty.'))
+    }
+
+    this.log(chalk.blue('Validating Gemini API key...'))
+    const geminiClient = new GeminiClient(geminiKey.trim())
+
+    try {
+      const isValid = await geminiClient.validateApiKey()
+      if (!isValid) {
+        this.error(chalk.red('Invalid Gemini API key. Please check your API key and try again.'))
+      }
+
+      setGeminiApiKey(geminiKey.trim())
+      setAIEnabled(true) // Enable AI by default when key is added
+      this.log(chalk.green('✓ Gemini API key validated and stored.'))
+
+      // Show first-time warning if not seen before
+      if (!hasSeenAIWarning()) {
+        this.log(
+          chalk.yellow(
+            '\nNote: Using AI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.',
+          ),
+        )
+        setAIWarningSeen()
+      }
+    } catch (error) {
+      this.error(
+        chalk.red(`Failed to validate Gemini API key: ${error instanceof Error ? error.message : String(error)}`),
+      )
+    }
   }
 }
