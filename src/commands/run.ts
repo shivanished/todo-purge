@@ -6,6 +6,9 @@ import {
   hasOpenAIApiKey,
   getOpenAIApiKey,
   getActiveWorkspace,
+  getAIEnabled,
+  getAIContextModel,
+  getAIDescriptionModel,
 } from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
 import {OpenAIClient} from '../lib/openai.js'
@@ -103,13 +106,16 @@ export default class Run extends Command {
     // Client is already initialized above for validation
 
     // Check if we should use AI generation
-    const useAI = hasOpenAIApiKey() && !flags['no-ai']
+    // --no-ai flag has highest priority, then check config setting
+    const useAI = !flags['no-ai'] && getAIEnabled() && hasOpenAIApiKey()
     let openAIClient: OpenAIClient | null = null
 
     if (useAI) {
       const openAIKey = getOpenAIApiKey()
       if (openAIKey) {
-        openAIClient = new OpenAIClient(openAIKey)
+        const contextModel = getAIContextModel()
+        const descriptionModel = getAIDescriptionModel()
+        openAIClient = new OpenAIClient(openAIKey, contextModel, descriptionModel)
       }
     }
 

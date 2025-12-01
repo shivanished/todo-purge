@@ -2,11 +2,15 @@ import OpenAI from 'openai'
 
 export class OpenAIClient {
   private client: OpenAI
+  private contextModel: string
+  private descriptionModel: string
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, contextModel?: string, descriptionModel?: string) {
     this.client = new OpenAI({
       apiKey,
     })
+    this.contextModel = contextModel ?? 'gpt-4.1-nano'
+    this.descriptionModel = descriptionModel ?? 'gpt-4.1-nano'
   }
 
   async generateDescription(
@@ -51,7 +55,7 @@ export class OpenAIClient {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const response = await this.client.chat.completions.create({
-          model: 'gpt-4.1-nano',
+          model: this.descriptionModel,
           messages: [
             {
               role: 'user',
@@ -137,7 +141,7 @@ Return ONLY the selected context lines in the exact format shown above (with lin
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const response = await this.client.chat.completions.create({
-          model: 'gpt-4.1-nano',
+          model: this.contextModel,
           messages: [{role: 'user', content: prompt}],
           temperature: 0.3,
           max_tokens: 2000,

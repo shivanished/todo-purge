@@ -16,6 +16,7 @@ import {
   getActiveWorkspace,
   readConfig,
   removeWorkspace,
+  setAIEnabled,
   type Workspace,
 } from '../lib/config.js'
 import {LinearClient} from '../lib/linear.js'
@@ -293,11 +294,12 @@ export default class Login extends Command {
         }
 
         setOpenAIApiKey(providedKey.trim())
+        setAIEnabled(true) // Enable AI by default when key is added
         this.log(chalk.green('✓ OpenAI API key validated and stored.'))
 
         // Show first-time warning if not seen before
         if (!hasSeenOpenAIWarning()) {
-          this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with --no-ai flag.'))
+          this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
           setOpenAIWarningSeen()
         }
       } catch (error) {
@@ -341,11 +343,12 @@ export default class Login extends Command {
       }
 
       setOpenAIApiKey(openAIKey.trim())
+      setAIEnabled(true) // Enable AI by default when key is added
       this.log(chalk.green('✓ OpenAI API key validated and stored.'))
 
       // Show first-time warning if not seen before
       if (!hasSeenOpenAIWarning()) {
-        this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with --no-ai flag.'))
+        this.log(chalk.yellow('\nNote: Using OpenAI will consume API credits. You can disable it with `todo-purge config` or the --no-ai flag.'))
         setOpenAIWarningSeen()
       }
     } catch (error) {

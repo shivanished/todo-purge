@@ -14,6 +14,9 @@ export interface Config {
   activeWorkspaceIndex?: number // 0-based index
   openAIApiKey?: string
   hasSeenOpenAIWarning?: boolean
+  aiEnabled?: boolean
+  aiContextModel?: string
+  aiDescriptionModel?: string
   // Legacy fields (for migration)
   linearApiKey?: string
   teamId?: string
@@ -207,5 +210,42 @@ export function hasSeenOpenAIWarning(): boolean {
 export function setOpenAIWarningSeen(): void {
   const config = readConfig()
   config.hasSeenOpenAIWarning = true
+  writeConfig(config)
+}
+
+export function getAIEnabled(): boolean {
+  const config = readConfig()
+  if (config.aiEnabled !== undefined) {
+    return config.aiEnabled
+  }
+  // Default: true if OpenAI key exists, false otherwise
+  return hasOpenAIApiKey()
+}
+
+export function setAIEnabled(enabled: boolean): void {
+  const config = readConfig()
+  config.aiEnabled = enabled
+  writeConfig(config)
+}
+
+export function getAIContextModel(): string {
+  const config = readConfig()
+  return config.aiContextModel ?? 'gpt-4.1-nano'
+}
+
+export function setAIContextModel(model: string): void {
+  const config = readConfig()
+  config.aiContextModel = model
+  writeConfig(config)
+}
+
+export function getAIDescriptionModel(): string {
+  const config = readConfig()
+  return config.aiDescriptionModel ?? 'gpt-4.1-nano'
+}
+
+export function setAIDescriptionModel(model: string): void {
+  const config = readConfig()
+  config.aiDescriptionModel = model
   writeConfig(config)
 }
