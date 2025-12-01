@@ -102,8 +102,8 @@ Just don't add an OpenAI key, or remove it from your config file.
 
 ### AI Costs
 
-- Uses `gpt-4o-mini` for context selection (cost-effective)
-- Uses `gpt-3.5-turbo` for descriptions (affordable)
+- Currently supporting `gpt-4.1-nano` for context selection (cost-effective)
+- Currently supporting `gpt-4.1-nano` for descriptions (affordable)
 - You'll see a warning if processing more than 10 TODOs at once
 - AI is only used when enabled - no charges if you don't configure a key
 
