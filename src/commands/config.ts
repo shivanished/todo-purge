@@ -15,6 +15,12 @@ import {
 } from '../lib/config.js'
 import chalk from 'chalk'
 
+const VALID_MODELS = ['gpt-4.1', 'gpt-4.1-nano', 'gpt-5.1', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'gpt-5-pro'] as const
+
+function isValidModel(model: string): boolean {
+  return VALID_MODELS.includes(model as (typeof VALID_MODELS)[number])
+}
+
 export default class Config extends Command {
   static override description = 'Configure todo-purge settings (AI, models, workspace)'
 
@@ -140,7 +146,11 @@ export default class Config extends Command {
 
     setAIEnabled(newValue)
     this.log(
-      chalk.green(`✓ AI ${newValue ? 'enabled' : 'disabled'}. ${newValue ? 'AI features will be used when running todo-purge.' : 'AI features will be skipped.'}`),
+      chalk.green(
+        `✓ AI ${newValue ? 'enabled' : 'disabled'}. ${
+          newValue ? 'AI features will be used when running todo-purge.' : 'AI features will be skipped.'
+        }`,
+      ),
     )
   }
 
@@ -150,8 +160,12 @@ export default class Config extends Command {
     const newModel = await this.prompt(chalk.cyan('Enter new context model (or press Enter to keep current): '))
 
     if (newModel.trim()) {
-      setAIContextModel(newModel.trim())
-      this.log(chalk.green(`✓ Context model set to: ${newModel.trim()}`))
+      const trimmedModel = newModel.trim()
+      if (!isValidModel(trimmedModel)) {
+        this.error(chalk.red(`Invalid model: ${trimmedModel}`))
+      }
+      setAIContextModel(trimmedModel)
+      this.log(chalk.green(`✓ Context model set to: ${trimmedModel}`))
     } else {
       this.log(chalk.gray('Keeping current model.'))
     }
@@ -163,8 +177,12 @@ export default class Config extends Command {
     const newModel = await this.prompt(chalk.cyan('Enter new description model (or press Enter to keep current): '))
 
     if (newModel.trim()) {
-      setAIDescriptionModel(newModel.trim())
-      this.log(chalk.green(`✓ Description model set to: ${newModel.trim()}`))
+      const trimmedModel = newModel.trim()
+      if (!isValidModel(trimmedModel)) {
+        this.error(chalk.red(`Invalid model: ${trimmedModel}`))
+      }
+      setAIDescriptionModel(trimmedModel)
+      this.log(chalk.green(`✓ Description model set to: ${trimmedModel}`))
     } else {
       this.log(chalk.gray('Keeping current model.'))
     }
@@ -215,10 +233,16 @@ export default class Config extends Command {
         this.log(chalk.green(`✓ Set ai.enabled to ${boolValue}`))
         break
       case 'ai.context-model':
+        if (!isValidModel(value)) {
+          this.error(chalk.red(`Invalid model: ${value}`))
+        }
         setAIContextModel(value)
         this.log(chalk.green(`✓ Set ai.context-model to ${value}`))
         break
       case 'ai.description-model':
+        if (!isValidModel(value)) {
+          this.error(chalk.red(`Invalid model: ${value}`))
+        }
         setAIDescriptionModel(value)
         this.log(chalk.green(`✓ Set ai.description-model to ${value}`))
         break
@@ -243,12 +267,18 @@ export default class Config extends Command {
             const workspace = workspaces[foundIndex]!
             this.log(chalk.green(`✓ Switched to workspace: ${workspace.teamName} (${workspace.teamKey})`))
           } else {
-            this.error(chalk.red(`Workspace "${value}" not found. Use a number (1-${workspaces.length}) or workspace name/key.`))
+            this.error(
+              chalk.red(`Workspace "${value}" not found. Use a number (1-${workspaces.length}) or workspace name/key.`),
+            )
           }
         }
         break
       default:
-        this.error(chalk.red(`Unknown config key: ${key}. Available keys: ai.enabled, ai.context-model, ai.description-model, workspace.active`))
+        this.error(
+          chalk.red(
+            `Unknown config key: ${key}. Available keys: ai.enabled, ai.context-model, ai.description-model, workspace.active`,
+          ),
+        )
     }
   }
 
@@ -279,8 +309,11 @@ export default class Config extends Command {
         }
         break
       default:
-        this.error(chalk.red(`Unknown config key: ${key}. Available keys: ai.enabled, ai.context-model, ai.description-model, workspace.active`))
+        this.error(
+          chalk.red(
+            `Unknown config key: ${key}. Available keys: ai.enabled, ai.context-model, ai.description-model, workspace.active`,
+          ),
+        )
     }
   }
 }
-
